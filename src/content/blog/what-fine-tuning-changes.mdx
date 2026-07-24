@@ -1,0 +1,37 @@
+---
+title: "What fine-tuning actually changes"
+description: "Fine-tuning doesn't teach a model new facts so much as it reshapes behaviour. Here's a practical way to think about what moves and what doesn't."
+pubDate: 2026-07-24
+tags: ["fine-tuning", "llm"]
+---
+
+There's a common misconception that fine-tuning is how you "add knowledge" to a
+language model. Usually it isn't. Fine-tuning is much better at changing
+_behaviour_ — format, tone, tool use, how the model decides what to do — than at
+reliably injecting new facts.
+
+## Behaviour moves easily
+
+If you want a model to always answer in a particular JSON shape, prefer a house
+style, or reach for a specific tool when it sees a certain kind of request, a few
+hundred well-chosen examples go a long way. You're not teaching the model
+anything it can't already express; you're shifting which of its existing
+behaviours it defaults to.
+
+## Facts move stubbornly
+
+Trying to teach durable factual knowledge through fine-tuning is fragile. The
+model may repeat a fact it saw during training, but it will also happily
+contradict it, and you have no clean way to update or retract it later.
+Retrieval — putting the fact in the prompt at inference time — is almost always
+the better tool for that job.
+
+## A rule of thumb
+
+Ask whether the thing you want is a _skill_ or a _fact_.
+
+- **Skill** (do this task, in this shape, with these tools) → fine-tuning fits.
+- **Fact** (this specific, changeable piece of information) → retrieval fits.
+
+Most real systems want both: retrieval for what's true right now, fine-tuning for
+how the model should behave when it answers.

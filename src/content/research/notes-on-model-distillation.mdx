@@ -1,0 +1,46 @@
+---
+title: "Notes on model distillation"
+description: "A working reference on the main flavours of distillation — what each optimises, and when to reach for it."
+pubDate: 2026-07-23
+tags: ["distillation", "research", "small-models"]
+---
+
+Distillation is the practice of training a smaller "student" model using signal
+from a larger "teacher". The details matter, because "distillation" covers
+several quite different techniques.
+
+## Response distillation (SFT on teacher outputs)
+
+The simplest version: run the teacher on a set of inputs, collect its outputs,
+and fine-tune the student on those input→output pairs. Cheap, effective as a
+warm-up, and the right starting point for most tasks.
+
+Its weakness is that the student only sees the teacher's _final answers_, not its
+uncertainty or its reasoning. It learns to imitate, not to recover when it drifts
+off the teacher's path.
+
+## On-policy distillation
+
+Here the student generates its own responses, and the teacher (or a verifier)
+grades _those_. The student learns from its own mistakes rather than only from
+the teacher's successes.
+
+This matters most for multi-step tasks — agents, tool use — where a student that
+only saw clean teacher trajectories has no idea how to get back on track once it
+makes an early error. Grading the student's own rollouts, step by step, is an
+active research area for exactly this reason.
+
+## Verifiable rewards
+
+When a task has a checkable outcome — did the code run, did the tool call parse,
+did the answer match a reference — you can reward the student on that outcome
+directly, no human labels or judge model required. Tool-calling is a natural fit:
+success is often mechanically verifiable.
+
+## The part people underrate
+
+Whatever the method, the hard question is the same: **how do you know the student
+is actually good enough to replace the teacher?** Not "good in the abstract" — good
+on the specific traffic you care about. A distilled model that's 95% as good on
+average can still be badly worse on the 5% that matters most. Evaluation on
+real, representative inputs is the whole game.

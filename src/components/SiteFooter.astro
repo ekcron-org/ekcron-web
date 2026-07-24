@@ -1,0 +1,17 @@
+---
+import { NAV, SITE, APP_URL } from "../consts";
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-zinc-200 dark:border-zinc-800">
+  <div
+    class="mx-auto flex w-full max-w-5xl flex-col gap-4 px-6 py-8 text-sm text-zinc-500 sm:flex-row sm:items-center sm:justify-between dark:text-zinc-400"
+  >
+    <p>&copy; {year} {SITE.name}</p>
+    <nav class="flex flex-wrap items-center gap-x-5 gap-y-2">
+      {NAV.map((item) => <a href={item.href} class="transition hover:text-zinc-900 dark:hover:text-zinc-100">{item.label}</a>)}
+      <a href="/rss.xml" class="transition hover:text-zinc-900 dark:hover:text-zinc-100">RSS</a>
+      <a href={`${APP_URL}/sign-in`} class="transition hover:text-zinc-900 dark:hover:text-zinc-100">Sign in</a>
+    </nav>
+  </div>
+</footer>

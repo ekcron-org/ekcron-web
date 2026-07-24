@@ -1,0 +1,27 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { SITE } from "../consts";
+---
+
+<BaseLayout title="About" description={`About ${SITE.name}.`}>
+  <article class="prose prose-zinc max-w-none dark:prose-invert">
+    <h1>About</h1>
+    <p>
+      {SITE.name} is focused on one question: how do you get the quality of a
+      large language model out of something far smaller and cheaper to run?
+    </p>
+    <p>
+      That pulls in a few connected topics — understanding how large models
+      behave, fine-tuning open models for specific tasks, and distilling large
+      models into small ones without losing what made them useful. The writing
+      here works through those ideas in the open: what the methods are, where
+      they break, and how you actually tell whether a smaller model is good
+      enough to rely on.
+    </p>
+    <p>
+      It's early and hands-on rather than polished. Experiments, notes, and
+      results go up as they happen. If any of it turns into something you can
+      use directly, it'll appear here first.
+    </p>
+  </article>
+</BaseLayout>

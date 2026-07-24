@@ -1,0 +1,22 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { FAQ } from "../consts";
+---
+
+<BaseLayout title="Help" description="Common questions.">
+  <header class="mb-8">
+    <h1 class="text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">Help</h1>
+    <p class="mt-2 text-zinc-600 dark:text-zinc-400">Common questions.</p>
+  </header>
+
+  <dl class="divide-y divide-zinc-200 dark:divide-zinc-800">
+    {
+      FAQ.map((item) => (
+        <div class="py-5">
+          <dt class="font-medium text-zinc-900 dark:text-white">{item.q}</dt>
+          <dd class="mt-1.5 text-zinc-600 dark:text-zinc-400">{item.a}</dd>
+        </div>
+      ))
+    }
+  </dl>
+</BaseLayout>

@@ -1,0 +1,33 @@
+---
+title: "Why small models are getting good"
+description: "Compact models keep closing the gap with the giants on narrow tasks. A short look at what's driving it and where the limits still are."
+pubDate: 2026-07-22
+tags: ["small-models", "distillation"]
+---
+
+A few years ago the story was simple: bigger models were better, full stop. That
+story is getting more complicated. On _specific_ tasks, small models — a few
+billion parameters, runnable on a single GPU or even a laptop — increasingly
+match models many times their size.
+
+## What changed
+
+Three things, mostly:
+
+1. **Better training data.** A lot of a large model's advantage is having seen
+   more, cleaner, better-curated data. When you distill that into a small model's
+   training set, the small model inherits much of the benefit.
+2. **Distillation as standard practice.** Training a small "student" to imitate a
+   large "teacher" is no longer a research trick — it's part of how the strong
+   open models are made.
+3. **Task narrowing.** A general model has to be good at everything. A small model
+   fine-tuned for one workload only has to be good at that. Narrowing the target
+   is a huge advantage.
+
+## Where the limits still bite
+
+Small models are less robust when a task drifts outside what they were tuned for,
+and they can be unstable over long chains of reasoning or tool calls — small
+errors compound. The interesting engineering question isn't "can a small model do
+this?" so much as "how do I know it's still doing it correctly?" — which is why
+evaluation matters as much as training.
