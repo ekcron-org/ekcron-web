@@ -205,7 +205,6 @@ export const SHOWCASES: ShowcaseItem[] = [
     title: "Long runs, watched from the outside.",
     body: [
       "Runs are scheduled on GPUs, checkpointed as they go, and report step, loss, learning rate, and throughput while they are still running.",
-      "Held-out loss is checked at intervals as well, not only at the end.",
     ],
     scene: "train",
     label: "Run monitor",
