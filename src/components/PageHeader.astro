@@ -1,0 +1,36 @@
+---
+import Container from "./ui/Container.astro";
+import Eyebrow from "./ui/Eyebrow.astro";
+
+interface Props {
+  title: string;
+  eyebrow?: string;
+  lede?: string;
+  width?: "prose" | "default";
+}
+
+const { title, eyebrow, lede, width = "prose" } = Astro.props;
+---
+
+<div class="relative overflow-hidden border-b border-zinc-200 dark:border-white/10">
+  <div
+    class="pointer-events-none absolute inset-0 text-zinc-900 opacity-60 dark:text-white dark:opacity-100"
+    aria-hidden="true"
+  >
+    <div class="bg-grid absolute inset-0"></div>
+  </div>
+  <Container width={width} class="relative py-16 sm:py-20">
+    <div class:list={[width === "default" && "max-w-2xl"]}>
+      {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
+      <h1
+        class:list={[
+          "text-4xl font-semibold tracking-tight text-zinc-950 sm:text-5xl dark:text-white",
+          eyebrow && "mt-3",
+        ]}
+      >
+        {title}
+      </h1>
+      {lede && <p class="mt-5 text-lg/relaxed text-zinc-600 dark:text-zinc-400">{lede}</p>}
+    </div>
+  </Container>
+</div>

@@ -1,0 +1,67 @@
+---
+/** Page 1 is /blog; later pages are /blog/page/N. */
+interface Props {
+  current: number;
+  total: number;
+}
+
+const { current, total } = Astro.props;
+
+const hrefFor = (page: number) => (page === 1 ? "/blog" : `/blog/page/${page}`);
+
+const pages = Array.from({ length: total }, (_, i) => i + 1);
+
+const linkBase =
+  "inline-flex h-9 min-w-9 items-center justify-center rounded-lg px-3 text-sm transition-colors";
+const inactive =
+  "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-white";
+const disabled = "pointer-events-none opacity-40";
+---
+
+{
+  total > 1 && (
+    <nav
+      class="mt-12 flex items-center justify-between border-t border-zinc-200 pt-6 dark:border-white/10"
+      aria-label="Pagination"
+    >
+      <a
+        href={hrefFor(current - 1)}
+        class:list={[linkBase, inactive, current === 1 && disabled]}
+        aria-disabled={current === 1 ? "true" : undefined}
+        rel="prev"
+      >
+        &larr; Previous
+      </a>
+
+      <div class="hidden items-center gap-1 sm:flex">
+        {pages.map((page) => (
+          <a
+            href={hrefFor(page)}
+            aria-current={page === current ? "page" : undefined}
+            class:list={[
+              linkBase,
+              page === current
+                ? "bg-zinc-100 font-medium text-zinc-950 dark:bg-white/10 dark:text-white"
+                : inactive,
+            ]}
+          >
+            {page}
+          </a>
+        ))}
+      </div>
+
+      <span class="font-mono text-xs text-zinc-500 sm:hidden dark:text-zinc-500">
+        {current} / {total}
+      </span>
+
+      <a
+        href={hrefFor(current + 1)}
+        class:list={[linkBase, inactive, current === total && disabled]}
+        aria-disabled={current === total ? "true" : undefined}
+        rel="next"
+      >
+        Next &rarr;
+      </a>
+    </nav>
+  )
+}

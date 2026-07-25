@@ -1,0 +1,28 @@
+---
+interface Props {
+  id?: string;
+  size?: "sm" | "md" | "lg";
+  divider?: boolean;
+  class?: string;
+}
+
+const { id, size = "md", divider = false, class: className = "" } = Astro.props;
+
+const sizes = {
+  sm: "py-14 sm:py-16",
+  md: "py-20 sm:py-24",
+  lg: "py-24 sm:py-32",
+} as const;
+---
+
+<section
+  id={id}
+  class:list={[
+    sizes[size],
+    divider && "border-t border-zinc-200 dark:border-white/10",
+    id && "scroll-mt-16",
+    className,
+  ]}
+>
+  <slot />
+</section>

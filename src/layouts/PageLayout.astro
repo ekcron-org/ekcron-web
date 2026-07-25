@@ -1,0 +1,34 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import Container from "../components/ui/Container.astro";
+import PageHeader from "../components/PageHeader.astro";
+import BrandStrip from "../components/sections/BrandStrip.astro";
+
+interface Props {
+  title: string;
+  description?: string;
+  eyebrow?: string;
+  lede?: string;
+  prose?: boolean;
+}
+
+const { title, description, eyebrow, lede, prose = true } = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <PageHeader title={title} eyebrow={eyebrow} lede={lede} />
+
+  <slot name="banner"><BrandStrip /></slot>
+
+  <Container width="prose" class="py-14 sm:py-16">
+    {
+      prose ? (
+        <div class="prose prose-zinc max-w-none dark:prose-invert prose-headings:font-semibold prose-headings:tracking-tight prose-a:text-accent-700 prose-a:decoration-accent-300 hover:prose-a:text-accent-600 dark:prose-a:text-accent-300 dark:prose-a:decoration-accent-700 dark:hover:prose-a:text-accent-200">
+          <slot />
+        </div>
+      ) : (
+        <slot />
+      )
+    }
+  </Container>
+</BaseLayout>

@@ -23,3 +23,7 @@ dist/
 *.pem
 *.log
 *.tsbuildinfo
+.gstack/
+
+# local-only tooling, never published
+.local/

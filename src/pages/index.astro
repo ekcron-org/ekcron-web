@@ -1,64 +1,56 @@
 ---
-import { getCollection } from "astro:content";
-import type { CollectionEntry } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import Container from "../components/ui/Container.astro";
+import Section from "../components/ui/Section.astro";
+import SectionHeading from "../components/ui/SectionHeading.astro";
 import PostList from "../components/PostList.astro";
-import { SITE, TOPICS } from "../consts";
+import Hero from "../components/sections/Hero.astro";
+import Pipeline from "../components/sections/Pipeline.astro";
+import Capabilities from "../components/sections/Capabilities.astro";
+import Showcase from "../components/sections/Showcase.astro";
+import Experiments from "../components/sections/Experiments.astro";
+import FaqSection from "../components/sections/FaqSection.astro";
+import CtaBand from "../components/sections/CtaBand.astro";
+import BrandStrip from "../components/sections/BrandStrip.astro";
+import { getPosts } from "../lib/posts";
+import { HOME_POST_COUNT, SHOWCASES } from "../consts";
 
-function published<T extends CollectionEntry<"blog"> | CollectionEntry<"research">>(
-  posts: T[],
-): T[] {
-  return posts
-    .filter((p) => !p.data.draft)
-    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-}
-
-const blog = published(await getCollection("blog")).slice(0, 4);
-const research = published(await getCollection("research")).slice(0, 3);
+const posts = (await getPosts()).slice(0, HOME_POST_COUNT);
 ---
 
 <BaseLayout>
-  <section class="py-6 md:py-10">
-    <h1 class="text-4xl font-bold tracking-tight text-zinc-900 md:text-5xl dark:text-white">
-      {SITE.tagline}
-    </h1>
-    <p class="mt-5 max-w-2xl text-lg text-zinc-600 dark:text-zinc-400">
-      {SITE.description}
-    </p>
-  </section>
+  <Hero />
 
-  <section class="mt-8 grid gap-6 border-t border-zinc-200 pt-10 sm:grid-cols-3 dark:border-zinc-800">
-    {
-      TOPICS.map((t) => (
-        <div>
-          <h2 class="font-semibold text-zinc-900 dark:text-white">{t.title}</h2>
-          <p class="mt-1.5 text-sm text-zinc-600 dark:text-zinc-400">{t.body}</p>
-        </div>
-      ))
-    }
-  </section>
+  <BrandStrip class="mt-20 border-t sm:mt-24" />
+
+  <Pipeline />
+  <Capabilities />
+
+  {SHOWCASES.map((item, i) => <Showcase item={item} reversed={i % 2 === 1} />)}
+
+  <Experiments />
 
   {
-    research.length > 0 && (
-      <section class="mt-14">
-        <div class="flex items-baseline justify-between">
-          <h2 class="text-xl font-semibold text-zinc-900 dark:text-white">Research</h2>
-          <a href="/research" class="text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100">All research &rarr;</a>
-        </div>
-        <div class="mt-2">
-          <PostList base="/research" posts={research} />
-        </div>
-      </section>
+    posts.length > 0 && (
+      <Section divider>
+        <Container>
+          <div class="flex flex-wrap items-end justify-between gap-4">
+            <SectionHeading eyebrow="Writing" title="From the blog" />
+            <a
+              href="/blog"
+              class="text-sm font-medium text-accent-700 transition-colors hover:text-accent-600 dark:text-accent-300 dark:hover:text-accent-200"
+            >
+              All posts &rarr;
+            </a>
+          </div>
+          <div class="mt-10">
+            <PostList base="/blog" posts={posts} />
+          </div>
+        </Container>
+      </Section>
     )
   }
 
-  <section class="mt-14">
-    <div class="flex items-baseline justify-between">
-      <h2 class="text-xl font-semibold text-zinc-900 dark:text-white">Latest writing</h2>
-      <a href="/blog" class="text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100">All posts &rarr;</a>
-    </div>
-    <div class="mt-2">
-      <PostList base="/blog" posts={blog} empty="First posts coming soon." />
-    </div>
-  </section>
+  <FaqSection />
+  <CtaBand />
 </BaseLayout>

@@ -1,0 +1,23 @@
+---
+/** Canvas scene. Scenes live in src/lib/particles/scenes and are looked up by name. */
+interface Props {
+  scene: "distill" | "train" | "evaluate" | "drift";
+  density?: number;
+  class?: string;
+}
+
+const { scene, density = 1, class: className = "" } = Astro.props;
+---
+
+<canvas
+  data-particle-field
+  data-scene={scene}
+  data-density={density}
+  class:list={["block h-full w-full", className]}
+  aria-hidden="true"></canvas>
+
+<script>
+  import { mountFields } from "../../lib/particles/engine";
+
+  mountFields("[data-particle-field]");
+</script>

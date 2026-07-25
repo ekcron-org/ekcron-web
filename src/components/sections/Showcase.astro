@@ -1,0 +1,60 @@
+---
+import type { ShowcaseItem } from "../../consts";
+import Container from "../ui/Container.astro";
+import Section from "../ui/Section.astro";
+import Eyebrow from "../ui/Eyebrow.astro";
+import HudPanel from "../visuals/HudPanel.astro";
+import ParticleField from "../visuals/ParticleField.astro";
+
+interface Props {
+  item: ShowcaseItem;
+  reversed?: boolean;
+}
+
+const { item, reversed = false } = Astro.props;
+
+const SWATCH = {
+  source: "bg-cyan-brand-deep dark:bg-cyan-brand",
+  target: "bg-accent-600 dark:bg-accent-400",
+} as const;
+---
+
+<Section id={item.id} divider>
+  <Container>
+    <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+      <div class:list={[reversed && "lg:order-2"]}>
+        <Eyebrow>{item.eyebrow}</Eyebrow>
+        <h2
+          class="mt-5 text-3xl font-semibold tracking-tight text-zinc-950 sm:text-4xl/[1.15] dark:text-white"
+        >
+          {item.title}
+        </h2>
+        {
+          item.body.map((paragraph) => (
+            <p class="mt-5 text-base/relaxed text-zinc-600 sm:text-lg/relaxed dark:text-zinc-400">
+              {paragraph}
+            </p>
+          ))
+        }
+      </div>
+
+      <HudPanel
+        label={item.label}
+        status={item.status}
+        class:list={[reversed && "lg:order-1"]}
+      >
+        <ParticleField scene={item.scene} />
+        <div slot="footer" class="flex flex-wrap items-center gap-x-5 gap-y-2">
+          {
+            item.legend.map((entry) => (
+              <span class="flex items-center gap-2 font-mono text-[0.625rem] tracking-[0.16em] text-zinc-500 uppercase dark:text-zinc-400">
+                <span class:list={["h-1.5 w-1.5 rounded-full", SWATCH[entry.tone]]} />
+                {entry.label}
+              </span>
+            ))
+          }
+        </div>
+      </HudPanel>
+    </div>
+  </Container>
+</Section>

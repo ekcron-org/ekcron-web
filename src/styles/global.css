@@ -1,18 +1,57 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* Self-hosted variable fonts — no runtime requests to a third party. */
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/jetbrains-mono";
+
 /* Class-based dark mode: `dark:` utilities respond to a `.dark` ancestor. */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+  DESIGN TOKENS — single source of truth for the whole site.
+
+  The accent scale is derived from the brand mark's own gradient
+  (cyan #24E5DF -> violet #A31DFF). Violet carries interaction because
+  white-on-#A31DFF clears WCAG AA for body text; cyan is the highlight
+  partner and is never used for small text on light surfaces.
+
+  Re-theme the site by editing these values and nothing else.
+*/
 @theme {
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    Helvetica, Arial, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono",
-    Menlo, Consolas, monospace;
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo,
+    Consolas, monospace;
+
+  --color-accent-50: #f8ecff;
+  --color-accent-100: #f0d8ff;
+  --color-accent-200: #e0b3ff;
+  --color-accent-300: #cf8aff;
+  --color-accent-400: #bc55ff;
+  --color-accent-500: #a31dff;
+  --color-accent-600: #8b00e6;
+  --color-accent-700: #7000ba;
+  --color-accent-800: #55008d;
+  --color-accent-900: #3c0064;
+  --color-accent-950: #24003c;
+
+  --color-cyan-brand: #24e5df;
+  --color-cyan-brand-deep: #12a8a3;
+
+  /* Near-black surfaces tuned to the brand banner rather than pure #000. */
+  --color-ink-900: #131316;
+  --color-ink-950: #0b0b0d;
+
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
 }
 
 html {
@@ -22,6 +61,152 @@ html {
 
 body {
   text-wrap: pretty;
+  /* Inter's stylistic sets: straight-sided 1, disambiguated l/I. */
+  font-feature-settings: "cv05", "cv11", "ss01";
+}
+
+h1,
+h2,
+h3,
+h4 {
+  text-wrap: balance;
+  letter-spacing: -0.021em;
+}
+
+/* One focus ring, everywhere, visible on both surfaces. */
+:where(a, button, input, textarea, select, summary):focus-visible {
+  outline: 2px solid var(--color-accent-500);
+  outline-offset: 2px;
+  border-radius: 0.375rem;
+}
+
+::selection {
+  background-color: var(--color-accent-200);
+  color: var(--color-accent-950);
+}
+
+html.dark ::selection {
+  background-color: var(--color-accent-700);
+  color: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* --- Brand -------------------------------------------------------------- */
+
+/* Signature gradient. Used sparingly: one phrase per view, plus fine accents. */
+.text-brand-gradient {
+  background-image: linear-gradient(
+    100deg,
+    var(--color-cyan-brand) 0%,
+    var(--color-accent-500) 62%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.bg-brand-gradient {
+  background-image: linear-gradient(
+    100deg,
+    var(--color-cyan-brand) 0%,
+    var(--color-accent-500) 62%
+  );
+}
+
+/* Hairline rule that fades at both ends — used to separate major bands. */
+.rule-fade {
+  height: 1px;
+  background-image: linear-gradient(
+    to right,
+    transparent,
+    color-mix(in oklab, currentColor 18%, transparent) 20%,
+    color-mix(in oklab, currentColor 18%, transparent) 80%,
+    transparent
+  );
+}
+
+/*
+  Engineering-grid backdrop, masked so it dissolves toward the edges.
+  `currentColor` lets the same class sit on light or dark surfaces.
+*/
+.bg-grid {
+  background-image:
+    linear-gradient(
+      to right,
+      color-mix(in oklab, currentColor 7%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklab, currentColor 7%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(
+    ellipse 75% 60% at 50% 0%,
+    #000 35%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 75% 60% at 50% 0%,
+    #000 35%,
+    transparent 100%
+  );
+}
+
+.hud-pulse {
+  animation: hud-pulse 2.4s var(--ease-out-quint) infinite;
+}
+
+@keyframes hud-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Soft brand bloom for hero/CTA surfaces. Decorative only. */
+.bloom-brand {
+  background-image:
+    radial-gradient(
+      40rem 22rem at 18% -10%,
+      color-mix(in oklab, var(--color-cyan-brand) 22%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      38rem 20rem at 82% 0%,
+      color-mix(in oklab, var(--color-accent-500) 26%, transparent),
+      transparent 70%
+    );
+}
+
+/* --- Prose -------------------------------------------------------------- */
+
+.prose :where(h2, h3, h4) {
+  scroll-margin-top: 6rem;
+}
+
+.prose :where(a) {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
 }
 
 /* Shiki dual-theme: swap to the dark palette when .dark is present. */
@@ -32,9 +217,4 @@ html.dark .astro-code span {
   font-style: var(--shiki-dark-font-style) !important;
   font-weight: var(--shiki-dark-font-weight) !important;
   text-decoration: var(--shiki-dark-text-decoration) !important;
-}
-
-/* Anchor links generated for headings in prose. */
-.prose :where(h2, h3, h4) {
-  scroll-margin-top: 6rem;
 }

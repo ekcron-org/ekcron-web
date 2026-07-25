@@ -1,0 +1,176 @@
+---
+import PageLayout from "../layouts/PageLayout.astro";
+import Notice from "../components/ui/Notice.astro";
+import { SITE, CONTACT, LEGAL_UPDATED } from "../consts";
+---
+
+<PageLayout
+  title="Privacy"
+  eyebrow="Legal"
+  description={`How ${SITE.name} handles data.`}
+  lede={`Last updated ${LEGAL_UPDATED}.`}
+>
+  <Notice title="Read this first">
+    <p>
+      {SITE.name} is an independent, experimental project run by one individual. It is
+      not a company or a commercial service, and it is provided as is, with no
+      warranty of availability, retention, or confidentiality.
+    </p>
+    <p>
+      <strong>Do not upload confidential, regulated, or personal data.</strong>{" "}
+      Account deletion is not self-serve yet; until it is, email us and your data will
+      be removed.
+    </p>
+  </Notice>
+
+  <p>
+    This notice explains what the Project collects, why, and what is not done with
+    it. It covers this website and the {SITE.name} application.
+  </p>
+
+  <h2>Who operates the Project</h2>
+  <p>
+    The Project is run by a single individual in a personal, non-commercial capacity,
+    not by a company. Where data-protection law would treat someone as the
+    "controller" of data processed here, that is the maintainer personally. For any
+    privacy question or request, email us using the address at the bottom of this
+    page.
+  </p>
+
+  <h2>What is collected</h2>
+  <ul>
+    <li>
+      <strong>Account details.</strong> When you create an account: your name, email
+      address, and authentication identifiers from the sign-in provider. Used to
+      identify you and protect your workspace.
+    </li>
+    <li>
+      <strong>Content you upload.</strong> Documents, datasets, prompts, and the
+      models trained from them. Stored so the Project can process them for you.
+    </li>
+    <li>
+      <strong>Operational data.</strong> Job records, resource usage, and error logs.
+      Used to debug and to keep the environment running.
+    </li>
+    <li>
+      <strong>Aggregate site analytics.</strong> Non-identifying traffic counts for
+      this website. No advertising or cross-site tracking.
+    </li>
+  </ul>
+  <p>
+    Please do not submit anyone else's personal data. If you do, you are acting as
+    that data's controller and are responsible for having a lawful basis to process
+    it here.
+  </p>
+
+  <h2>Why it is processed</h2>
+  <p>
+    Data is processed only to operate the Project for you — to authenticate you, run
+    the jobs you request, show you results, and keep the system working and secure.
+    Where a lawful basis is required, it is the performance of the agreement you
+    entered into by using the Project, and the maintainer's legitimate interest in
+    keeping it running and secure.
+  </p>
+
+  <h2>How your content is used</h2>
+  <ul>
+    <li>
+      Your data is <strong>not</strong> used to train any model of the maintainer's,
+      and is not pooled with other users' data.
+    </li>
+    <li>
+      Your data is <strong>not</strong> sold, rented, published, or shared for
+      advertising.
+    </li>
+    <li>
+      Content is scoped to your own workspace so other accounts cannot reach it.
+    </li>
+    <li>
+      The maintainer claims no ownership of your data, models, or their outputs. See
+      the <a href="/terms">terms</a>.
+    </li>
+  </ul>
+
+  <h2>Infrastructure providers</h2>
+  <p>
+    Running the Project requires a small number of third-party providers — hosting,
+    object storage, databases, GPU compute, and authentication. They process data
+    only as needed to deliver their part of the system, under their own terms and
+    security practices.
+  </p>
+
+  <h2>International transfers</h2>
+  <p>
+    Those providers operate in various countries, including outside your own, so data
+    may be stored or processed abroad — including in the United States. Protections
+    available in your jurisdiction may not apply once data is held elsewhere. Using
+    the Project means accepting that, which is another reason not to upload sensitive
+    data.
+  </p>
+
+  <h2>Model provider API keys</h2>
+  <p>
+    You can use the default model endpoints or configure your own provider API key. A
+    key you configure is <strong>encrypted at rest</strong> (AES-256-GCM), is never
+    displayed back to you in full, and is used only to sign requests you initiate.
+    Those requests reach the provider you selected, under that provider's terms.
+  </p>
+  <p>
+    The honest assurance is that keys are encrypted. If you spot anything in the code or behaviour that could leak a
+    credential, please email us to get that fixed rather than disclosing it publicly.
+  </p>
+
+  <h2>Retention and deletion</h2>
+  <p>
+    Content is kept while your account is active. You can delete datasets, models,
+    and other artifacts in the app; that removes them from active systems, and
+    backups age out on their ordinary cycle. Account-level deletion is not yet
+    self-serve — email us and your account and associated data will be removed.
+  </p>
+
+  <h2>Security</h2>
+  <p>
+    Data is encrypted in transit, access is authenticated, and stored provider
+    credentials are encrypted at rest. That said, this is an experimental project run
+    by one person: <strong>
+      no guarantee against compromise, unauthorised access, or accidental exposure is
+      given or implied,
+    </strong> and there is no formal incident-response or breach-notification
+    programme. Where the law requires notification of a breach, reasonable efforts
+    will be made to comply, but no timeframe is promised.
+  </p>
+
+  <h2>Children</h2>
+  <p>
+    The Project is not intended for anyone under 18, and accounts should not be
+    created by them. If you believe a minor has provided data here, email us and it
+    will be deleted.
+  </p>
+
+  <h2>Your rights</h2>
+  <p>
+    Depending on where you live, you may have rights to access, correct, export, or
+    delete your personal data, to withdraw consent, and to object to certain
+    processing. Email us and your request will be handled. You may also have the
+    right to complain to your local data-protection authority.
+  </p>
+
+  <h2>Cookies</h2>
+  <p>
+    This website stores only what is needed to remember your theme preference. The
+    application uses cookies required for sign-in and session management. No
+    advertising or cross-site tracking cookies are used.
+  </p>
+
+  <h2>Changes</h2>
+  <p>
+    This notice may change. The date above always reflects the current version, and
+    there is no notification mechanism — check back here rather than expecting to be
+    told.
+  </p>
+
+  <h2>Contact</h2>
+  <p>
+    Email: <a href={`mailto:${CONTACT.admin}`}>{CONTACT.admin}</a>
+  </p>
+</PageLayout>

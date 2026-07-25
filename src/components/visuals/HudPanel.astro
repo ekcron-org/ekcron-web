@@ -1,0 +1,63 @@
+---
+/** Instrument-panel frame: corner brackets, a label, and an optional footer rail. */
+interface Props {
+  label?: string;
+  status?: string;
+  class?: string;
+}
+
+const { label, status, class: className = "" } = Astro.props;
+
+const CORNERS = [
+  "top-3 left-3 border-t border-l",
+  "top-3 right-3 border-t border-r",
+  "bottom-3 left-3 border-b border-l",
+  "bottom-3 right-3 border-b border-r",
+];
+---
+
+<div
+  class:list={[
+    "relative isolate overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50 dark:border-white/10 dark:bg-ink-900",
+    className,
+  ]}
+>
+  <div class="relative aspect-[5/4] w-full sm:aspect-[16/11]">
+    <slot />
+
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+      {
+        CORNERS.map((corner) => (
+          <span
+            class:list={[
+              "absolute h-5 w-5 border-zinc-300 dark:border-white/20",
+              corner,
+            ]}
+          />
+        ))
+      }
+    </div>
+
+    {
+      label && (
+        <span class="pointer-events-none absolute top-5 right-6 font-mono text-[0.625rem] tracking-[0.18em] text-zinc-500 uppercase dark:text-zinc-400">
+          {label}
+        </span>
+      )
+    }
+  </div>
+
+  {
+    (status || Astro.slots.has("footer")) && (
+      <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t border-zinc-200 px-5 py-3 dark:border-white/10">
+        <slot name="footer" />
+        {status && (
+          <span class="flex items-center gap-2 font-mono text-[0.625rem] tracking-[0.16em] text-zinc-500 uppercase dark:text-zinc-400">
+            <span class="hud-pulse h-1.5 w-1.5 rounded-full bg-accent-500" />
+            {status}
+          </span>
+        )}
+      </div>
+    )
+  }
+</div>

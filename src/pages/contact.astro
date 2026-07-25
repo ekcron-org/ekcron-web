@@ -1,0 +1,64 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Container from "../components/ui/Container.astro";
+import PageHeader from "../components/PageHeader.astro";
+import BrandStrip from "../components/sections/BrandStrip.astro";
+import Card from "../components/ui/Card.astro";
+import { CONTACT, SITE } from "../consts";
+
+const channels = [
+  {
+    label: "General",
+    value: CONTACT.general,
+    href: `mailto:${CONTACT.general}`,
+    note: "Questions about the platform, access, or anything else.",
+  },
+  {
+    label: "Account & privacy",
+    value: CONTACT.admin,
+    href: `mailto:${CONTACT.admin}`,
+    note: "Account or data deletion, privacy requests, and security reports.",
+  },
+  {
+    label: "Developer",
+    value: "Dinesh",
+    href: CONTACT.developer,
+    note: "Code, issues, and any technical details.",
+    external: true,
+  },
+];
+---
+
+<BaseLayout title="Contact" description={`Get in touch with ${SITE.name}.`}>
+  <PageHeader
+    eyebrow="Contact"
+    title="Get in touch"
+    lede="Questions, feedback, bug reports, and ideas are all welcome. Pick whichever route fits and send an email."
+    width="default"
+  />
+  <BrandStrip />
+
+  <Container class="py-14 sm:py-16">
+    <div class="grid gap-4 md:grid-cols-3">
+      {
+        channels.map((c) => (
+          <Card interactive class="flex flex-col p-6">
+            <p class="font-mono text-xs tracking-[0.14em] text-accent-600 uppercase dark:text-accent-300">
+              {c.label}
+            </p>
+            <a
+              href={c.href}
+              class="mt-3 block text-lg font-medium break-words text-zinc-950 transition-colors hover:text-accent-700 dark:text-white dark:hover:text-accent-300"
+              {...(c.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+            >
+              {c.value}
+            </a>
+            <p class="mt-2 text-sm/relaxed text-zinc-600 dark:text-zinc-400">
+              {c.note}
+            </p>
+          </Card>
+        ))
+      }
+    </div>
+  </Container>
+</BaseLayout>

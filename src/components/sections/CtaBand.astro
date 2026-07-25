@@ -1,0 +1,54 @@
+---
+import { APP_URL } from "../../consts";
+import Button from "../ui/Button.astro";
+import Container from "../ui/Container.astro";
+import Section from "../ui/Section.astro";
+
+const SIGN_IN = `${APP_URL}/sign-in`;
+---
+
+<Section size="sm" divider>
+  <Container>
+    <div
+      class="relative isolate overflow-hidden rounded-2xl border border-white/10 bg-ink-950 px-7 py-14 sm:px-14"
+    >
+      <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+        <div class="bloom-brand absolute inset-0 opacity-30"></div>
+        <div class="absolute inset-0 text-white">
+          <div class="bg-grid absolute inset-0 opacity-70"></div>
+        </div>
+      </div>
+
+      <div class="grid items-center gap-10 md:grid-cols-[1.6fr_1fr]">
+        <div>
+          <h2 class="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+            Start with one small run
+          </h2>
+          <p class="mt-4 max-w-lg text-lg/relaxed text-zinc-400">
+            Bring a dataset, tune a small open model, and see the evaluation
+            against its baseline. The fastest way to judge whether this fits your
+            task is to run it once.
+          </p>
+          <div class="mt-8 flex flex-wrap gap-3">
+            <Button href={SIGN_IN} size="lg">Get started</Button>
+            <Button href="/help" variant="secondaryOnDark" size="lg">
+              Read the FAQ
+            </Button>
+          </div>
+        </div>
+
+        <div class="hidden justify-self-center md:block">
+          <img
+            src="/logo-color.svg"
+            alt=""
+            width="176"
+            height="176"
+            loading="lazy"
+            decoding="async"
+            class="h-44 w-44 drop-shadow-[0_0_45px_rgba(163,29,255,0.35)]"
+          />
+        </div>
+      </div>
+    </div>
+  </Container>
+</Section>

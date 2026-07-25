@@ -1,0 +1,50 @@
+---
+import type { CollectionEntry } from "astro:content";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import Container from "../../../components/ui/Container.astro";
+import PageHeader from "../../../components/PageHeader.astro";
+import BrandStrip from "../../../components/sections/BrandStrip.astro";
+import PostList from "../../../components/PostList.astro";
+import Pagination from "../../../components/Pagination.astro";
+import { getPosts } from "../../../lib/posts";
+import { BLOG_PAGE_SIZE } from "../../../consts";
+
+/* Pages 2..N only; page 1 is /blog. Nested under /blog/page/ to avoid colliding with /blog/[...slug]. */
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  const totalPages = Math.ceil(posts.length / BLOG_PAGE_SIZE);
+
+  return Array.from({ length: Math.max(0, totalPages - 1) }, (_, i) => {
+    const page = i + 2;
+    return {
+      params: { page: String(page) },
+      props: {
+        posts: posts.slice((page - 1) * BLOG_PAGE_SIZE, page * BLOG_PAGE_SIZE),
+        current: page,
+        total: totalPages,
+      },
+    };
+  });
+}
+
+interface Props {
+  posts: CollectionEntry<"blog">[];
+  current: number;
+  total: number;
+}
+
+const { posts, current, total } = Astro.props;
+---
+
+<BaseLayout
+  title={`Blog · page ${current}`}
+  description="Notes on fine-tuning, distillation, evaluation, and running small language models."
+>
+  <PageHeader eyebrow="Blog" title="Writing" lede={`Page ${current} of ${total}.`} />
+  <BrandStrip />
+
+  <Container width="prose" class="py-10 sm:py-12">
+    <PostList base="/blog" posts={posts} />
+    <Pagination current={current} total={total} />
+  </Container>
+</BaseLayout>

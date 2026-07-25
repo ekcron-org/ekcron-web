@@ -1,27 +1,87 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import { SITE } from "../consts";
+import PageLayout from "../layouts/PageLayout.astro";
+import { SITE, CONTACT } from "../consts";
 ---
 
-<BaseLayout title="About" description={`About ${SITE.name}.`}>
-  <article class="prose prose-zinc max-w-none dark:prose-invert">
-    <h1>About</h1>
-    <p>
-      {SITE.name} is focused on one question: how do you get the quality of a
-      large language model out of something far smaller and cheaper to run?
-    </p>
-    <p>
-      That pulls in a few connected topics — understanding how large models
-      behave, fine-tuning open models for specific tasks, and distilling large
-      models into small ones without losing what made them useful. The writing
-      here works through those ideas in the open: what the methods are, where
-      they break, and how you actually tell whether a smaller model is good
-      enough to rely on.
-    </p>
-    <p>
-      It's early and hands-on rather than polished. Experiments, notes, and
-      results go up as they happen. If any of it turns into something you can
-      use directly, it'll appear here first.
-    </p>
-  </article>
-</BaseLayout>
+<PageLayout
+  title="About"
+  eyebrow="About"
+  description={`About ${SITE.name}.`}
+  lede="A workbench for language model experiments, built on the idea that a small model you own and understand beats a large one you rent and can't inspect."
+>
+
+  <h2>Why this exists</h2>
+  <p>
+    General-purpose models are remarkable, and for most one-off questions they are
+    the right tool. But a lot of real work is narrow and repetitive: the same kind
+    of document, the same kind of decision, the same output format, thousands of
+    times over. For that shape of problem, a small model tuned on your own data can
+    be accurate enough, dramatically cheaper to run, and because you hold the
+    weights, something you can deploy wherever you like.
+  </p>
+  <p>
+    Getting there is the awkward part. The techniques are published and the open
+    models are available, but stitching together data preparation, training
+    orchestration, honest evaluation, and serving is a real infrastructure project
+    before you have learned anything about your task. {SITE.name} exists to remove
+    that gap: bring data, run the experiment, see whether it worked.
+  </p>
+
+  <h2>How it approaches the problem</h2>
+  <p>
+    Three principles shape the platform:
+  </p>
+  <ul>
+    <li>
+      <strong>Evaluation is not optional.</strong> A tuned model is only interesting
+      relative to a baseline. A split is held out before training, and results are
+      always reported against both the held-out data and the untuned model, including
+      when the answer is that nothing improved.
+    </li>
+    <li>
+      <strong>You keep what you make.</strong> Datasets, adapters, and exported
+      builds can be downloaded and run on your own hardware. Hosted inference is a
+      convenience, never a lock-in mechanism.
+    </li>
+    <li>
+      <strong>Small and reproducible over large and mysterious.</strong> Every run
+      records its dataset version, configuration, and metrics, so a result you liked
+      can be found again and repeated.
+    </li>
+  </ul>
+
+  <h2>What this is, plainly</h2>
+  <p>
+    Ekcron is an independent, experimental engineering project, built and maintained
+    by one person in a personal capacity. It is not a company, not a registered
+    business entity, and not a commercial service. Nothing is sold and no fee is
+    charged.
+  </p>
+  <p>
+    It runs as is, with no warranties and no guarantees of uptime, retention, or
+    confidentiality. Please do not upload confidential or sensitive data, and do not
+    depend on it for production work. Whatever you build here is yours: the project
+    claims no ownership of your data, your trained models, or their output. The <a
+      href="/terms">terms</a
+    > and <a href="/privacy">privacy notice</a> set this out in full.
+  </p>
+  <p>
+    The platform is under active development. The pipeline described on this site,
+    from data preparation through to deployment and export, is what it does today.
+    Capabilities land incrementally, and anything genuinely usable shows up in the
+    app rather than only on this page.
+  </p>
+
+  <h2>Get in touch</h2>
+  <p>
+    Questions, feedback, and bug reports are all welcome. The <a href="/contact"
+      >contact page</a
+    > has the details, or email <a href={`mailto:${CONTACT.general}`}
+      >{CONTACT.general}</a
+    >. Public code and issues live on <a
+      href={CONTACT.repo}
+      target="_blank"
+      rel="noopener noreferrer">GitHub</a
+    >.
+  </p>
+</PageLayout>

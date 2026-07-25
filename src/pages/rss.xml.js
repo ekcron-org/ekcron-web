@@ -3,16 +3,7 @@ import { getCollection } from "astro:content";
 import { SITE } from "../consts";
 
 export async function GET(context) {
-  const blog = (await getCollection("blog", ({ data }) => !data.draft)).map((p) => ({
-    ...p,
-    base: "/blog",
-  }));
-  const research = (await getCollection("research", ({ data }) => !data.draft)).map((p) => ({
-    ...p,
-    base: "/research",
-  }));
-
-  const items = [...blog, ...research].sort(
+  const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
     (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
   );
 
@@ -20,11 +11,11 @@ export async function GET(context) {
     title: SITE.name,
     description: SITE.description,
     site: context.site,
-    items: items.map((p) => ({
+    items: posts.map((p) => ({
       title: p.data.title,
       description: p.data.description,
       pubDate: p.data.pubDate,
-      link: `${p.base}/${p.id}/`,
+      link: `/blog/${p.id}/`,
     })),
   });
 }

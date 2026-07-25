@@ -1,19 +1,31 @@
 ---
-import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import Container from "../../components/ui/Container.astro";
+import PageHeader from "../../components/PageHeader.astro";
+import BrandStrip from "../../components/sections/BrandStrip.astro";
 import PostList from "../../components/PostList.astro";
+import Pagination from "../../components/Pagination.astro";
+import { getPosts } from "../../lib/posts";
+import { BLOG_PAGE_SIZE } from "../../consts";
 
-const posts = (await getCollection("blog"))
-  .filter((p) => !p.data.draft)
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const posts = await getPosts();
+const totalPages = Math.max(1, Math.ceil(posts.length / BLOG_PAGE_SIZE));
+const pagePosts = posts.slice(0, BLOG_PAGE_SIZE);
 ---
 
-<BaseLayout title="Blog" description="Writing on language models, fine-tuning, and small models.">
-  <header class="mb-6">
-    <h1 class="text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">Blog</h1>
-    <p class="mt-2 text-zinc-600 dark:text-zinc-400">
-      Notes and posts on language models, fine-tuning, and running smaller models well.
-    </p>
-  </header>
-  <PostList base="/blog" posts={posts} empty="First posts coming soon." />
+<BaseLayout
+  title="Blog"
+  description="Notes on fine-tuning, distillation, evaluation, and running small language models."
+>
+  <PageHeader
+    eyebrow="Blog"
+    title="Writing"
+    lede="Notes on fine-tuning, distillation, evaluation, and getting useful work out of small models."
+  />
+  <BrandStrip />
+
+  <Container width="prose" class="py-10 sm:py-12">
+    <PostList base="/blog" posts={pagePosts} empty="First posts coming soon." />
+    <Pagination current={1} total={totalPages} />
+  </Container>
 </BaseLayout>

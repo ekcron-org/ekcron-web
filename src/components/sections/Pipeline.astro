@@ -1,0 +1,32 @@
+---
+import { PIPELINE } from "../../consts";
+import Container from "../ui/Container.astro";
+import Section from "../ui/Section.astro";
+import SectionHeading from "../ui/SectionHeading.astro";
+---
+
+<Section id="how-it-works">
+  <Container>
+    <SectionHeading
+      eyebrow="How it works"
+      title="From raw data to a model you can run"
+      body="Five stages, each one inspectable. Stop after any of them, or run the whole path end to end."
+    />
+
+    <ol class="mt-14 space-y-px">
+      {
+        PIPELINE.map((stage) => (
+          <li class="group relative grid gap-x-8 gap-y-3 border-t border-zinc-200 py-8 sm:grid-cols-[6rem_1fr] md:grid-cols-[6rem_16rem_1fr] dark:border-white/10">
+            <span class="font-mono text-sm text-accent-600 dark:text-accent-300">
+              {stage.step}
+            </span>
+            <h3 class="text-lg font-medium text-zinc-950 dark:text-white">
+              {stage.title}
+            </h3>
+            <p class="max-w-xl text-zinc-600 dark:text-zinc-400">{stage.body}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </Container>
+</Section>

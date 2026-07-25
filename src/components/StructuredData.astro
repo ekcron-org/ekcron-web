@@ -1,0 +1,122 @@
+---
+import { SITE, CONTACT } from "../consts";
+
+/** schema.org JSON-LD. `meta keywords` is ignored by search engines and is intentionally absent. */
+interface Props {
+  type?: "website" | "article" | "faq";
+  title?: string;
+  description?: string;
+  url: string;
+  datePublished?: string;
+  dateModified?: string;
+  faq?: { q: string; a: string }[];
+  breadcrumbs?: { name: string; url: string }[];
+}
+
+const {
+  type = "website",
+  title,
+  description = SITE.description,
+  url,
+  datePublished,
+  dateModified,
+  faq,
+  breadcrumbs,
+} = Astro.props;
+
+const person = {
+  "@type": "Person",
+  name: "Dinesh",
+  url: CONTACT.developer,
+};
+
+const graph: Record<string, unknown>[] = [
+  {
+    "@type": "WebSite",
+    "@id": `${SITE.url}/#website`,
+    url: SITE.url,
+    name: SITE.name,
+    description: SITE.description,
+    inLanguage: "en",
+    publisher: { "@id": `${SITE.url}/#person` },
+  },
+  {
+    "@id": `${SITE.url}/#person`,
+    ...person,
+  },
+  {
+    "@type": "WebApplication",
+    "@id": `${SITE.url}/#app`,
+    name: SITE.name,
+    url: SITE.url,
+    applicationCategory: "DeveloperApplication",
+    applicationSubCategory: "Machine learning",
+    operatingSystem: "Web browser",
+    description: SITE.description,
+    author: { "@id": `${SITE.url}/#person` },
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+    featureList: [
+      "Fine-tune open language models with LoRA and QLoRA",
+      "Distill large models into smaller ones",
+      "Preference and reinforcement tuning (DPO, GRPO)",
+      "Held-out evaluation against a baseline",
+      "OpenAI-compatible inference endpoint",
+      "Export adapters and GGUF builds for self-hosting",
+    ],
+  },
+];
+
+if (type === "article" && title) {
+  graph.push({
+    "@type": "BlogPosting",
+    "@id": `${url}#article`,
+    headline: title,
+    description,
+    url,
+    datePublished,
+    dateModified: dateModified ?? datePublished,
+    author: { "@id": `${SITE.url}/#person` },
+    publisher: { "@id": `${SITE.url}/#person` },
+    isPartOf: { "@id": `${SITE.url}/#website` },
+    mainEntityOfPage: url,
+    image: `${SITE.url}/og.jpg`,
+  });
+}
+
+if (type === "faq" && faq?.length) {
+  graph.push({
+    "@type": "FAQPage",
+    "@id": `${url}#faq`,
+    mainEntity: faq.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+  });
+}
+
+if (breadcrumbs?.length) {
+  graph.push({
+    "@type": "BreadcrumbList",
+    "@id": `${url}#breadcrumbs`,
+    itemListElement: breadcrumbs.map((crumb, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: crumb.name,
+      item: crumb.url,
+    })),
+  });
+}
+
+const jsonLd = { "@context": "https://schema.org", "@graph": graph };
+---
+
+<script
+  type="application/ld+json"
+  is:inline
+  set:html={JSON.stringify(jsonLd)}
+/>

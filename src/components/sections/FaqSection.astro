@@ -1,0 +1,42 @@
+---
+import { FAQ } from "../../consts";
+import Container from "../ui/Container.astro";
+import FaqList from "../FaqList.astro";
+import Section from "../ui/Section.astro";
+import SectionHeading from "../ui/SectionHeading.astro";
+
+const PREVIEW_COUNT = 5;
+---
+
+<Section divider>
+  <Container>
+    <div class="grid gap-12 lg:grid-cols-[1fr_1.5fr]">
+      <SectionHeading
+        eyebrow="FAQ"
+        title="Questions, answered plainly"
+        body="More detail on the help page."
+      />
+      <div>
+        <FaqList items={FAQ.slice(0, PREVIEW_COUNT)} />
+        <a
+          href="/help"
+          class="mt-8 inline-flex items-center gap-1.5 text-sm font-medium text-accent-700 transition-colors hover:text-accent-600 dark:text-accent-300 dark:hover:text-accent-200"
+        >
+          All questions
+          <svg
+            class="h-4 w-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M5 12h14M13 6l6 6-6 6"></path>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </Container>
+</Section>

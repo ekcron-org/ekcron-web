@@ -1,0 +1,43 @@
+---
+interface Props {
+  items: { q: string; a: string }[];
+  class?: string;
+}
+
+const { items, class: className = "" } = Astro.props;
+---
+
+<div class:list={["divide-y divide-zinc-200 dark:divide-white/10", className]}>
+  {
+    items.map((item) => (
+      <details class="group py-1">
+        <summary
+          class="flex cursor-pointer list-none items-center justify-between gap-6 py-4 text-left font-medium text-zinc-950 transition-colors hover:text-accent-700 dark:text-white dark:hover:text-accent-300"
+        >
+          {item.q}
+          <svg
+            class="h-4 w-4 shrink-0 text-zinc-400 transition-transform duration-200 group-open:-rotate-180 dark:text-zinc-500"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M6 9l6 6 6-6"></path>
+          </svg>
+        </summary>
+        <p class="max-w-2xl pr-10 pb-5 text-[0.9375rem]/relaxed text-zinc-600 dark:text-zinc-400">
+          {item.a}
+        </p>
+      </details>
+    ))
+  }
+</div>
+
+<style>
+  summary::-webkit-details-marker {
+    display: none;
+  }
+</style>
