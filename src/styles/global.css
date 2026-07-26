@@ -11,10 +11,11 @@
 /*
   DESIGN TOKENS — single source of truth for the whole site.
 
-  The accent scale is derived from the brand mark's own gradient
-  (cyan #24E5DF -> violet #A31DFF). Violet carries interaction because
-  white-on-#A31DFF clears WCAG AA for body text; cyan is the highlight
-  partner and is never used for small text on light surfaces.
+  Interaction colour is a deep blue, deliberately distinct from the mark's
+  cyan-to-violet gradient: white on accent-700 clears WCAG AA, and a solid
+  hue reads calmer than a gradient on controls. The mark keeps its violet
+  via --color-brand-violet; cyan stays the highlight partner and is never
+  used for small text on light surfaces.
 
   Re-theme the site by editing these values and nothing else.
 */
@@ -24,17 +25,21 @@
   --font-mono: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo,
     Consolas, monospace;
 
-  --color-accent-50: #f8ecff;
-  --color-accent-100: #f0d8ff;
-  --color-accent-200: #e0b3ff;
-  --color-accent-300: #cf8aff;
-  --color-accent-400: #bc55ff;
-  --color-accent-500: #a31dff;
-  --color-accent-600: #8b00e6;
-  --color-accent-700: #7000ba;
-  --color-accent-800: #55008d;
-  --color-accent-900: #3c0064;
-  --color-accent-950: #24003c;
+  --color-accent-50: #eef4ff;
+  --color-accent-100: #dbe6fe;
+  --color-accent-200: #bfd3fe;
+  --color-accent-300: #93b4fd;
+  --color-accent-400: #608ffa;
+  --color-accent-500: #3b6bf6;
+  --color-accent-600: #254eeb;
+  --color-accent-700: #1d3dd8;
+  --color-accent-800: #1e34af;
+  --color-accent-900: #1e318a;
+  --color-accent-950: #172154;
+
+  /* The mark's own violet. Reserved for the logo and the one gradient phrase
+     so re-theming interaction colour never alters the brand mark. */
+  --color-brand-violet: #a31dff;
 
   --color-cyan-brand: #24e5df;
   --color-cyan-brand-deep: #12a8a3;
@@ -111,7 +116,7 @@ html.dark ::selection {
   background-image: linear-gradient(
     100deg,
     var(--color-cyan-brand) 0%,
-    var(--color-accent-500) 62%
+    var(--color-brand-violet) 62%
   );
   -webkit-background-clip: text;
   background-clip: text;
@@ -122,7 +127,7 @@ html.dark ::selection {
   background-image: linear-gradient(
     100deg,
     var(--color-cyan-brand) 0%,
-    var(--color-accent-500) 62%
+    var(--color-brand-violet) 62%
   );
 }
 
@@ -193,7 +198,7 @@ html.dark ::selection {
     ),
     radial-gradient(
       38rem 20rem at 82% 0%,
-      color-mix(in oklab, var(--color-accent-500) 26%, transparent),
+      color-mix(in oklab, var(--color-brand-violet) 26%, transparent),
       transparent 70%
     );
 }

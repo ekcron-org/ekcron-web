@@ -202,7 +202,7 @@ export const SHOWCASES: ShowcaseItem[] = [
   {
     id: "training",
     eyebrow: "Training",
-    title: "Long runs, watched from the outside.",
+    title: "See training as it happens.",
     body: [
       "Runs are scheduled on GPUs, checkpointed as they go, and report step, loss, learning rate, and throughput while they are still running.",
     ],
