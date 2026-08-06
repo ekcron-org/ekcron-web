@@ -24,6 +24,12 @@ export const CONTACT = {
   repo: env.PUBLIC_REPO_URL ?? "https://github.com/HumbleBee14/ekcron",
 } as const;
 
+export const SOCIALS = {
+  x: env.PUBLIC_X_URL ?? "https://x.com/ekcron",
+  linkedin:
+    env.PUBLIC_LINKEDIN_URL ?? "https://www.linkedin.com/company/ekcron/",
+} as const;
+
 /** Effective date shown on the legal pages. */
 export const LEGAL_UPDATED = "July 2026";
 
@@ -68,6 +74,7 @@ export const FOOTER_NAV: { title: string; links: { href: string; label: string }
     links: [
       { href: "/about", label: "About" },
       { href: "/contact", label: "Contact" },
+      { href: CONTACT.repo, label: "Contribute" },
     ],
   },
   {
@@ -107,7 +114,7 @@ export const PIPELINE: { step: string; title: string; body: string }[] = [
   {
     step: "03",
     title: "Fine-tune or distill",
-    body: "Run LoRA and QLoRA jobs on open models using supervised, preference, or reinforcement methods, on managed GPUs.",
+    body: "Run QLoRA, LoRA, or full fine-tuning on open models using supervised, preference, or reinforcement methods, on managed GPUs.",
   },
   {
     step: "04",
@@ -243,7 +250,7 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Which models can I work with?",
-    a: "Open-weight models, tuned with parameter-efficient methods (LoRA and QLoRA). Small and mid-size models are the focus, because they are the ones you can afford to iterate on and realistically self-host.",
+    a: "Open-weight models, tuned with QLoRA or LoRA by default, with full fine-tuning available when adapters aren't enough. Small and mid-size models are the focus, because they are the ones you can afford to iterate on and realistically self-host.",
   },
   {
     q: "How do I know a run actually improved something?",
@@ -256,6 +263,10 @@ export const FAQ: { q: string; a: string }[] = [
   {
     q: "What happens to my data?",
     a: "Your data and the models you train from it are yours, isolated to your workspace, and are not used to train anything of ours or shared with other users. The privacy page has the detail.",
+  },
+  {
+    q: "Is it open source?",
+    a: "Yes. The full source — the training pipeline, data generation, evaluation harness, and this site — is public on GitHub, so you can read exactly how your data is handled. Issues and pull requests are welcome.",
   },
   {
     q: "Is this a product I can buy?",
