@@ -1,0 +1,102 @@
+---
+title: "SFT, DPO, GRPO: what the post-training alphabet means"
+description: "The three letters behind every fine-tuning product, explained by what each one actually teaches a model: imitation, preference, and trial-and-error."
+pubDate: 2026-08-05
+tags: ["fine-tuning", "dpo", "grpo", "post-training"]
+---
+
+Every fine-tuning platform, paper, and announcement leans on the same acronyms —
+SFT, DPO, GRPO — usually without saying what they are. The good news: behind
+the alphabet sit three genuinely different _kinds of teaching_, and once you see
+them as teaching styles, choosing between them becomes almost obvious.
+
+## SFT: learning by imitation
+
+**Supervised fine-tuning** is the simplest idea in the book: show the model
+examples of the job done right — input paired with desired output — and train
+it to reproduce them, token by token. It's how a junior learns from worked
+examples.
+
+SFT is the foundation of everything else, and for most applied work it's also
+the finish line. If your goal is [behaviour](/blog/what-fine-tuning-changes) —
+answer in this format, in this voice, using this domain's vocabulary, from this
+document base — SFT on a few thousand
+[good examples](/blog/where-fine-tuning-data-comes-from) delivers it.
+
+Its limit is built into the method: the model only ever learns what _right_
+looks like. It never learns what _wrong_ looks like, or that one right answer
+is better than another. Imitation can't express "this answer is fine, but that
+one is better" — and some of the most valuable properties (concise over
+rambling, honest over confidently wrong) are exactly that kind of comparison.
+
+## DPO: learning from preferences
+
+**Direct Preference Optimization** teaches with comparisons instead of
+demonstrations. Each training example is a prompt plus _two_ responses — one
+chosen, one rejected — and the model is trained to shift probability toward the
+chosen one and away from the rejected one, anchored against a frozen reference
+copy of itself so it can't wander too far from its starting competence.
+
+That anchor deserves a sentence, because it's the non-obvious part: without it,
+the easiest way to "prefer" the chosen answer is to become a completely
+different model. DPO's objective explicitly measures movement _relative to the
+reference_, which keeps the model recognisably itself while nudging its taste.
+
+DPO earned its place by being the practical replacement for full-blown RLHF —
+the older approach of training a separate reward model and running
+reinforcement learning against it. DPO reaches similar quality for alignment
+work with the training complexity of, roughly, SFT.
+
+When to reach for it: your model already does the task (SFT came first — DPO
+pairs almost always build on an SFT'd model), but you have opinions about _how_.
+Too verbose. Hedges too much. Picks the technically-true-but-unhelpful answer.
+If you can collect pairs where one response beats another — from user feedback,
+editor corrections, or a strong model judging drafts — DPO turns those opinions
+into weights.
+
+## GRPO: learning by trial and score
+
+**Group Relative Policy Optimization** is reinforcement learning: instead of
+being shown answers, the model _tries_ — generating several attempts at each
+prompt — and each attempt is scored by a reward function. The model is then
+pushed toward what scored well.
+
+The "group relative" part is the trick that made this practical. Classic RL
+needs a second network just to estimate how good a response "should" be, so it
+can tell whether an attempt beat expectations. GRPO deletes that machinery:
+generate a _group_ of, say, eight attempts at the same prompt, average their
+scores, and treat above-group-average as good and below as bad. The group is
+its own baseline. Half the memory of classic RLHF, far fewer moving parts.
+
+The catch — and it's a defining one — is that GRPO needs a **reward you can
+compute**. Where an answer is mechanically checkable (the maths is right, the
+code passes tests, the tool call parses, the output matches a reference), GRPO
+shines, because the reward is objective and free. This is why GRPO powers the
+reasoning-model wave: maths and code are exactly the domains where correctness
+can be verified. Where "good" is a matter of judgment, the reward must come
+from a judge model — workable, but you inherit
+[the judge's biases](/blog/how-to-know-your-fine-tuned-model-is-any-good), and
+a model trained by trial-and-error _will_ find and exploit its grader's blind
+spots if it can.
+
+## Choosing, in one breath
+
+- **SFT** — always, first. It's where the task itself is learned. Often it's
+  enough; check with a [real evaluation](/blog/how-to-know-your-fine-tuned-model-is-any-good)
+  before assuming you need more.
+- **+ DPO** — when the model does the task but you want better judgment between
+  acceptable answers, and you can get preference pairs.
+- **+ GRPO** — when success is checkable (maths, code, tool calls, extraction
+  against a schema) and you want the model to _practise_ rather than imitate.
+
+The pattern across all three: as you move from imitation to preference to
+trial-and-error, you need less hand-crafted data but a clearer definition of
+"good" — SFT needs the answers themselves, DPO only needs to know which of two
+is better, GRPO needs nothing but a way to score. The alphabet is really a
+ladder of how explicitly you can say what you want.
+
+---
+
+_These are Ekcron's training modes: Quick (SFT), Aligned (SFT + DPO), and
+Reasoning (SFT + GRPO) — same datasets, same evaluation gate, pick the teaching
+style per job. [Try it at app.ekcron.com](https://app.ekcron.com)._

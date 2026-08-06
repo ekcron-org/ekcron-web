@@ -1,0 +1,106 @@
+---
+title: "How to know your fine-tuned model is any good"
+description: "A falling loss curve proves almost nothing. What real evaluation of a fine-tuned model looks like: held-out data, judges and their biases, and the comparison that actually matters."
+pubDate: 2026-08-03
+tags: ["evaluation", "fine-tuning"]
+---
+
+Training ends. The loss curve went down. The job says "completed". Here is the
+uncomfortable truth about that moment: **you know almost nothing yet.** A
+falling loss proves the model got better at predicting your training data — a
+model that memorised every example achieves a beautiful loss and is useless.
+The question you actually care about — _is it better at the job?_ — needs
+different machinery. This post is about that machinery.
+
+## The held-out set: the only honest witness
+
+The foundation of all of it: before training, a slice of the dataset —
+typically around 10% — is set aside and **never trained on**. These examples
+are the only data that can testify honestly, because the model has never seen
+them. Its performance there estimates its performance on the real, unseen
+traffic it'll face in production.
+
+Two rules keep the witness honest:
+
+- **The split happens before training, mechanically.** Deciding afterwards to
+  "test on some examples" invites accidentally testing on training data —
+  contamination — which produces flattering numbers that mean nothing. Worse,
+  contamination fails silently: the metrics look great right up until real
+  users arrive.
+- **Held-out means held out forever.** The moment you tune hyperparameters
+  against the held-out set repeatedly, you're training on it by another route —
+  slowly overfitting to your own test. Peek sparingly.
+
+## Scoring: exact checks where possible, judges where not
+
+_How_ you score the held-out answers depends on the task, in a strict order of
+preference:
+
+**Mechanical checks first.** If the output is structured — JSON that must
+parse, a label from a fixed set, a tool call with a known correct target —
+score it with code. Exact checks are free, deterministic, and can't be
+sweet-talked.
+
+**LLM-as-judge for the rest.** Free-form answers ("explain our refund policy")
+can't be string-matched, so a strong LLM grades them against the reference
+answer and source material. This works well enough to be the industry default —
+but a judge is a model, with documented biases you must design around:
+
+- **Length bias** — judges favour longer, more elaborate answers even when the
+  short one is correct.
+- **Position bias** — in side-by-side comparisons, judges favour whichever
+  answer they read first; serious harnesses score both orders and average.
+- **Style-over-substance** — confident, well-formatted wrongness outscores
+  hesitant correctness alarmingly often.
+- **Self-preference** — a judge rates text that sounds like itself more highly.
+
+None of these invalidate judge-based evaluation; they mean a judge's absolute
+score ("8.2/10") is nearly meaningless while its _comparative_ judgment, biases
+controlled, is quite reliable. Which leads to the real point:
+
+## The comparison that matters
+
+An evaluation score in isolation answers no decision. The decisions you face
+are comparative:
+
+- **Tuned vs base.** Did fine-tuning help _at all_? Run the untouched base
+  model on the same held-out set. If the tuned model can't clearly beat the
+  model it started from, do not deploy it — and be glad you found out this way.
+  This check is embarrassingly rare and catches real failures: an
+  [overfit run](/blog/from-documents-to-a-fine-tuned-model), a
+  [monotone dataset](/blog/where-fine-tuning-data-comes-from), a chat-template
+  bug that silently corrupted every example.
+- **New vs current.** Retraining on new data? The candidate must beat the model
+  currently serving, on the same set, before it replaces it. This is regression
+  testing, exactly as in software.
+- **Student vs teacher.** After [distillation](/blog/notes-on-model-distillation),
+  the question is parity: side by side on identical inputs, where does the small
+  model match the big one and where does it fall short? An average hides
+  everything — a student at "95% of the teacher" may be at 60% on the one
+  category that pays the bills. Per-category breakdowns or nothing.
+
+## Grounding: the domain-specific check
+
+For document-trained models one more evaluation earns its keep: **does the
+model's answer stay inside the documents?** A model can be fluent, plausible,
+even judged "helpful" — while asserting things your documentation never said.
+Checking answers against source passages measures exactly the failure that
+matters most in enterprise use: confident invention. A model that says "I don't
+know" where the documents are silent should _win_ points for it.
+
+## The bar to clear
+
+Evaluation doesn't need to be a research programme. The workable minimum is: a
+mechanically-enforced held-out split, scored with exact checks where possible
+and a bias-aware judge where not, always reported _as a comparison_ — against
+base, against current, against teacher — with a grounding check if the model
+speaks for your documents. That's a gate a solo team can run on every single
+training job. The alternative — eyeballing three chat responses and shipping —
+isn't evaluation. It's astrology with a GPU bill.
+
+---
+
+_Every Ekcron training job ends with this gate: automatic held-out evaluation,
+side-by-side comparison against the base model, grounding checks against your
+documents, and a parity report for distillation runs. [Try it at
+app.ekcron.com](https://app.ekcron.com)._

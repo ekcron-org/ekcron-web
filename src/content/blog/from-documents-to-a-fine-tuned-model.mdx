@@ -1,0 +1,100 @@
+---
+title: "From documents to a fine-tuned model: what actually happens"
+description: "The pipeline between 'here are my PDFs' and 'here is my model' has five distinct stages, and most of the quality is decided before training starts."
+pubDate: 2026-07-28
+tags: ["fine-tuning", "training-data", "pipeline"]
+---
+
+"Fine-tune a model on our documents" sounds like one step. It's five, and the
+one people picture — the GPU actually training — is neither the hardest nor the
+most important. Here's the whole pipeline, what each stage is for, and where
+quality is actually won or lost.
+
+## Stage 1: Parsing — turning files into text a model can learn from
+
+Documents arrive as PDFs, Word files, HTML, slides. Before anything else, they
+have to become clean text — and this is less trivial than it sounds. PDFs in
+particular are a _layout_ format, not a text format: a two-column paper, a table,
+a header repeated on every page, all come out scrambled if you extract naively.
+
+Bad parsing poisons everything downstream. If a table's cells get interleaved
+with body text, the training examples generated from that passage will teach the
+model confidently wrong associations. A good pipeline extracts structure —
+headings, sections, tables — not just characters, and discards boilerplate
+(footers, navigation, legal disclaimers repeated a thousand times).
+
+## Stage 2: Chunking — deciding what a "unit of knowledge" is
+
+Models train on examples of bounded length, so long documents are split into
+chunks. The naive way is every _N_ characters; the better way follows the
+document's own structure — split at section boundaries, keep a table with the
+paragraph that explains it, keep a definition with its term.
+
+Why it matters: each chunk becomes the _context_ from which training examples
+are generated. A chunk that cuts an explanation in half produces training pairs
+about half an explanation. Chunking is boring and decides more than it should.
+
+## Stage 3: Generating training data — the actual hard part
+
+Here's the step most people don't expect: **you don't train on the documents
+themselves.** Raw document text teaches a model to _continue documents_ — to
+write more PDF, so to speak. What you want is a model that _answers questions
+about_ (or performs tasks over) the material. That requires examples of the
+behaviour: instruction → response pairs.
+
+Since nobody hand-writes ten thousand Q&A pairs, a strong LLM generates them
+from each chunk: read the passage, produce the questions a real user would ask,
+answer them from the passage. This synthetic-data stage is where most of the
+final model's quality is determined, and it has two classic failure modes:
+
+- **Monotony.** Left alone, a generator produces the same three question shapes
+  over and over ("What is X?"). Training on monotone data yields a model that
+  handles exactly one phrasing. Good pipelines force diversity — factual
+  questions, comparisons, edge cases, questions phrased the way annoyed users
+  actually type.
+- **Drift.** Generated answers that go beyond the source passage import the
+  generator's own knowledge — and its mistakes — into your dataset. Answers must
+  stay grounded in the document, and the pairs are worth skimming by a human
+  before you spend GPU money on them. Reviewing fifty random pairs takes ten
+  minutes and catches systematic problems nothing else will.
+
+## Stage 4: Training — the part with the progress bar
+
+Only now does the GPU part start, and by now it's almost mechanical. The
+dataset is split — most for training, a slice held back for validation — and the
+model is tuned, typically with [LoRA or
+QLoRA](/blog/lora-qlora-or-full-fine-tuning) so it fits on affordable hardware.
+
+What you watch during training is the loss curve: training loss falling means
+the model is learning the data; validation loss rising while training loss
+falls means it has started _memorising_ instead of learning — overfitting — and
+it's time to stop. On a few thousand pairs this whole stage is often under an
+hour. It really is the easy part, provided the previous three were done well.
+
+## Stage 5: Evaluation — the difference between "trained" and "good"
+
+A finished training run proves nothing except that the loss went down. The
+question that matters — _did it actually get better at the task?_ — needs the
+held-out data: questions the model never saw in training, scored for accuracy
+and grounding, ideally compared side by side against the base model. If the
+tuned model can't beat the base model it started from on your own held-out set,
+you've learned that before your users did. That's the entire point of
+[evaluation](/blog/how-to-know-your-fine-tuned-model-is-any-good).
+
+Only after that gate does the model deserve deployment.
+
+## The uncomfortable summary
+
+The pipeline is: parse → chunk → generate → train → evaluate. Stages 1–3
+determine quality; stage 4 is commodity compute; stage 5 is what lets you ship
+with a straight face. Most fine-tuning disappointment traces back to skipping
+straight to stage 4 with whatever text was lying around — training a model,
+perfectly and efficiently, on data that never contained the behaviour anyone
+wanted.
+
+---
+
+_Ekcron runs this exact pipeline end to end: upload documents, get parsed and
+chunked text, review the generated training pairs before spending anything on
+GPUs, then train, evaluate, and deploy from one place. [Try it at
+app.ekcron.com](https://app.ekcron.com)._

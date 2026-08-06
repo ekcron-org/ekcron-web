@@ -1,0 +1,98 @@
+---
+title: "LoRA, QLoRA, or full fine-tuning: how to choose"
+description: "The three ways to update a model's weights, the intuition behind each, and a decision rule that covers almost every real case."
+pubDate: 2026-07-30
+tags: ["fine-tuning", "lora", "qlora"]
+---
+
+Every fine-tuning job faces the same first decision: update _all_ of the model's
+weights, or attach a small trainable patch and leave the original weights
+alone? The answer decides your hardware bill, your training time, and — less
+than most people fear — your quality. Here's the intuition for each option and a
+rule of thumb for choosing.
+
+## Full fine-tuning: move everything
+
+The original recipe: every parameter in the model gets updated by gradient
+descent. An 8B-parameter model has eight billion knobs, and all of them turn.
+
+The problem is memory. Training doesn't just hold the weights — it holds the
+gradients and the optimiser's bookkeeping for _every trainable parameter_,
+which multiplies the footprint several times over. A model that needs ~16 GB to
+merely run can need well north of 80 GB to fully fine-tune. That's multi-GPU,
+data-centre territory.
+
+Full fine-tuning also carries a subtler risk: with every weight free to move, a
+small dataset can drag the model a long way from where it started —
+**catastrophic forgetting**, where the model gets better at your task and
+quietly worse at everything else, including basic instruction following.
+
+## LoRA: move a low-rank patch instead
+
+LoRA (Low-Rank Adaptation) starts from an empirical observation: the _change_
+that fine-tuning makes to a weight matrix is highly redundant — it can be
+approximated by two thin matrices whose product has low rank. So instead of
+updating a large matrix **W**, you freeze it and learn a correction **ΔW = A ×
+B**, where A and B are tiny. At inference, the model computes with W + ΔW.
+
+The intuition: fine-tuning for one task doesn't need to rewrite the model's
+knowledge; it needs to _steer_ it, and steering is a low-dimensional operation.
+In practice the trainable patch is often under 1% of the model's parameters —
+which means under 1% of the gradient and optimiser memory, single-GPU training
+for models that would otherwise need a cluster, and adapters small enough to
+store one per customer or per task against a single shared base model.
+
+Quality? For behaviour-shaped tasks — style, format, domain Q&A, tool use —
+LoRA reliably lands within noise of full fine-tuning. The gap only opens on
+tasks that genuinely require rewriting broad capabilities, which most applied
+fine-tuning doesn't.
+
+The main knob is the **rank** (the thickness of A and B). Low ranks (8–16)
+suffice for style and format; higher ranks (32–64) help when the task involves
+more genuinely new material. Doubling rank doubles the patch, and returns
+diminish quickly.
+
+## QLoRA: the same patch on a compressed base
+
+QLoRA adds one more move: since the base weights are frozen anyway — we only
+_read_ them during training — why store them at full precision? QLoRA compresses
+the frozen base model to 4-bit precision and trains the same LoRA adapters on
+top, keeping the adapters themselves at full precision.
+
+That cuts the base model's memory to roughly a quarter. An 8B model becomes
+trainable in about 6 GB of VRAM — consumer-GPU territory. The 4-bit compression
+is lossy in principle, but because the high-precision adapters learn _around_
+the quantisation error, measured quality typically lands within a point of
+16-bit LoRA. For most tasks the difference is smaller than the run-to-run noise
+of training itself.
+
+The trade: training is somewhat slower per step (weights are de-compressed on
+the fly), and on tasks demanding fine numeric precision the gap to 16-bit LoRA
+can become visible. Both are usually cheap prices for a 4× memory cut.
+
+## The decision rule
+
+- **Default: QLoRA.** Cheapest, fits almost anywhere, and quality is close
+  enough that you should demand evidence before paying for more. Start here,
+  [evaluate](/blog/how-to-know-your-fine-tuned-model-is-any-good), and only
+  escalate if the evaluation says so.
+- **LoRA (16-bit)** when you have the VRAM and want to rule quantisation out —
+  the modest extra cost buys a slightly cleaner training signal, worth it for
+  final production runs of a recipe you've already validated.
+- **Full fine-tuning** only when adapters demonstrably plateau below your
+  target — which usually signals a deep task (new language, heavy reasoning
+  shift) — and you have the multi-GPU budget and a plan for regression testing
+  against forgetting.
+
+Notice what the rule is really saying: the choice isn't a quality ladder to
+climb as high as you can afford. It's an escalation path you walk only as far
+as your held-out evaluation forces you to. Most workloads stop at the first
+step — and the money saved is better spent on
+[better training data](/blog/from-documents-to-a-fine-tuned-model), which moves
+quality far more than any of the three methods above.
+
+---
+
+_Ekcron supports all three methods on every training mode, with a cost estimate
+before anything runs — QLoRA on an 8B model starts at around 6 GB of VRAM.
+[Try it at app.ekcron.com](https://app.ekcron.com)._

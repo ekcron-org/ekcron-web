@@ -2,6 +2,7 @@
 title: "What fine-tuning actually changes"
 description: "Fine-tuning doesn't teach a model new facts so much as it reshapes behaviour. Here's a practical way to think about what moves and what doesn't."
 pubDate: 2026-07-24
+updatedDate: 2026-08-05
 tags: ["fine-tuning", "llm"]
 ---
 
@@ -9,6 +10,11 @@ There's a common misconception that fine-tuning is how you "add knowledge" to a
 language model. Usually it isn't. Fine-tuning is much better at changing
 _behaviour_ — format, tone, tool use, how the model decides what to do — than at
 reliably injecting new facts.
+
+The distinction matters because it decides whether fine-tuning will feel like
+magic or like a waste of a GPU bill. Teams that fine-tune for behaviour tend to
+be delighted. Teams that fine-tune to memorise a knowledge base tend to conclude
+that "fine-tuning doesn't work" — when really they used the wrong tool.
 
 ## Behaviour moves easily
 
@@ -18,13 +24,36 @@ hundred well-chosen examples go a long way. You're not teaching the model
 anything it can't already express; you're shifting which of its existing
 behaviours it defaults to.
 
+Some things that move with surprisingly little data:
+
+- **Output structure.** Strict JSON, a fixed report template, a diff format —
+  models internalise shape fast, and you stop paying for a page of format
+  instructions in every prompt.
+- **Voice and register.** Your support tone, your legal team's hedging, the way
+  your docs address the reader.
+- **Domain vocabulary and defaults.** Which of several plausible interpretations
+  of an ambiguous request your users actually mean.
+- **Refusal and escalation policy.** When to answer, when to ask a clarifying
+  question, when to hand off to a human.
+- **Tool selection.** Given twelve tools, which one this class of request calls
+  for, with correctly shaped arguments.
+
+A useful side effect: once behaviour lives in the weights, your prompts shrink.
+Fewer instructions and fewer few-shot examples per request means lower latency
+and lower cost on every single call — which is often where the fine-tune pays
+for itself.
+
 ## Facts move stubbornly
 
 Trying to teach durable factual knowledge through fine-tuning is fragile. The
 model may repeat a fact it saw during training, but it will also happily
-contradict it, and you have no clean way to update or retract it later.
+contradict it, and you have no clean way to update or retract it later. When the
+fact changes — a price, a policy, a version number — your only options are
+retraining or hoping.
+
 Retrieval — putting the fact in the prompt at inference time — is almost always
-the better tool for that job.
+the better tool for that job. It's updateable in seconds, auditable (you can see
+exactly what the model was shown), and it fails loudly rather than confidently.
 
 ## A rule of thumb
 
@@ -35,3 +64,29 @@ Ask whether the thing you want is a _skill_ or a _fact_.
 
 Most real systems want both: retrieval for what's true right now, fine-tuning for
 how the model should behave when it answers.
+
+There's a middle category worth naming: _stable_ domain knowledge. The
+terminology of your industry, the concepts that haven't changed in a decade, the
+reasoning patterns of your field. That does transfer through fine-tuning,
+because it behaves more like a skill than like a lookup. What doesn't transfer
+well is anything you'd put in a table.
+
+## What this means in practice
+
+Before fine-tuning, it's worth writing down the behaviour you want as if it were
+a spec: "given requests like X, the model should respond like Y." If you can
+express the change as a few dozen concrete input→output examples, fine-tuning
+will very likely deliver it. If what you actually wrote down is a list of facts,
+stop and build retrieval instead.
+
+And when the behaviour you want fits a small model, fine-tuning gets more
+attractive still — the tuned model is cheaper, faster, and entirely yours. More
+on that in [why small models are getting
+good](/blog/why-small-models-are-getting-good).
+
+---
+
+_Ekcron is built around exactly this workflow: upload your documents, generate
+training data from them, fine-tune an open model, and check the result against
+a held-out evaluation before you ship it. [Try it at
+app.ekcron.com](https://app.ekcron.com)._

@@ -1,46 +1,107 @@
 ---
 title: "Notes on model distillation"
-description: "A working reference on the main flavours of distillation: what each optimises, and when to reach for it."
+description: "A working reference on the main flavours of distillation: what each optimises, what it costs, and when to reach for it."
 pubDate: 2026-07-23
+updatedDate: 2026-08-05
 tags: ["distillation", "research", "small-models"]
 ---
 
 Distillation is the practice of training a smaller "student" model using signal
-from a larger "teacher". The details matter, because "distillation" covers
-several quite different techniques.
+from a larger "teacher". It's how you get [a small model that behaves like a big
+one](/blog/why-small-models-are-getting-good) on the traffic you care about —
+without paying big-model prices on every request.
+
+The details matter, because "distillation" covers several quite different
+techniques, in increasing order of fidelity and cost.
 
 ## Response distillation (SFT on teacher outputs)
 
 The simplest version: run the teacher on a set of inputs, collect its outputs,
 and fine-tune the student on those input→output pairs. Cheap, effective as a
-warm-up, and the right starting point for most tasks.
+warm-up, and the right starting point for most tasks. If your task is narrow —
+one domain, one output shape — this alone often gets you most of the way.
 
-Its weakness is that the student only sees the teacher's _final answers_, not its
-uncertainty or its reasoning. It learns to imitate, not to recover when it drifts
-off the teacher's path.
+Its weakness is that the student only sees the teacher's _final answers_. Every
+training example says "the correct next token is exactly this one," which throws
+away everything the teacher actually knew: that three other phrasings were
+nearly as good, that one plausible-looking continuation was a trap. The student
+learns to imitate, not to judge.
+
+## Logit distillation (matching the distribution)
+
+The classic remedy: instead of training the student to reproduce the teacher's
+single chosen token, train it to match the teacher's _probability distribution_
+over tokens, typically by minimising the KL divergence between the two at every
+position.
+
+The distribution is a far richer training signal than the answer alone. Where
+plain SFT gives the student one bit per token ("this one"), the distribution
+tells it how confident the teacher was, which alternatives were acceptable, and
+which were catastrophic. Students trained this way tend to generalise better
+from the same number of examples and to be better calibrated — they inherit some
+of the teacher's uncertainty, not just its choices.
+
+The costs are practical. You need access to the teacher's logits, not just its
+text — which generally means an open-weights teacher you can run yourself, since
+proprietary APIs return words, not distributions. Storage and compute also grow:
+you're training against thousands of soft targets per position instead of one
+label (in practice you keep only the top-k of the distribution, which preserves
+nearly all the signal at a fraction of the size). And the student and teacher
+must share a tokeniser, or you have to align two different vocabularies —
+solvable, but fiddly.
 
 ## On-policy distillation
 
-Here the student generates its own responses, and the teacher (or a verifier)
-grades _those_. The student learns from its own mistakes rather than only from
-the teacher's successes.
+Both methods above train the student on _teacher_ trajectories. That leaves a
+known blind spot: the student never learns what to do once it drifts off the
+teacher's path — and at inference time, it's always on its own path.
 
-This matters most for multi-step tasks — agents, tool use — where a student that
-only saw clean teacher trajectories has no idea how to get back on track once it
-makes an early error. Grading the student's own rollouts, step by step, is an
-active research area for exactly this reason.
+On-policy distillation closes the loop. The student generates its own responses,
+and the teacher grades _those_ — token by token or step by step — so the
+student learns from its own mistakes rather than only from the teacher's
+successes.
+
+This matters most for multi-step work — agents, tool use, long reasoning chains —
+where an early error compounds. A student that only ever saw clean teacher
+trajectories has no idea how to recover; a student graded on its own rollouts
+has been corrected precisely where it actually goes wrong. It's the most
+expensive flavour (you're sampling from the student and scoring with the teacher,
+continuously), and the one with the strongest results on agentic tasks.
 
 ## Verifiable rewards
 
 When a task has a checkable outcome — did the code run, did the tool call parse,
 did the answer match a reference — you can reward the student on that outcome
 directly, no human labels or judge model required. Tool-calling is a natural fit:
-success is often mechanically verifiable.
+success is often mechanically verifiable. Where a verifier exists, use it; it's
+cheaper than a teacher and it never hallucinates a grade.
+
+## Choosing between them
+
+A reasonable default sequence, stopping as soon as evaluation says you're done:
+
+1. **Response distillation** first. Cheapest, and often sufficient.
+2. **Logit distillation** when the student plateaus and you can run the teacher
+   yourself — same data, richer signal.
+3. **On-policy** when the failure mode is drift: multi-step tasks where the
+   student starts well and falls apart.
 
 ## The part people underrate
 
 Whatever the method, the hard question is the same: **how do you know the student
 is actually good enough to replace the teacher?** Not "good in the abstract" — good
 on the specific traffic you care about. A distilled model that's 95% as good on
-average can still be badly worse on the 5% that matters most. Evaluation on
-real, representative inputs is the whole game.
+average can still be badly worse on the 5% that matters most.
+
+That means evaluating teacher and student on the _same_ held-out inputs, drawn
+from real usage, and comparing them side by side — a parity check, not a
+leaderboard score. If you can't produce that comparison, you don't know whether
+you've distilled a model or just trained a cheaper way to be wrong. Evaluation
+on real, representative inputs is the whole game.
+
+---
+
+_Ekcron implements all three flavours — teacher-generated data, logit matching,
+and on-policy correction — and every distillation run ends with a parity report
+comparing student to teacher on held-out data. [Try it at
+app.ekcron.com](https://app.ekcron.com)._
