@@ -1,0 +1,80 @@
+---
+/**
+ * One cell of a hairline grid. The parent supplies the grid and the 1px
+ * lines (gap-px on a line-coloured background); the cell paints its own face.
+ * Without `title`, the label doubles as the heading, bold in the mono row.
+ */
+import Glyph from "./Glyph.astro";
+
+interface Props {
+  index: string;
+  label: string;
+  title?: string;
+  body: string;
+  icon: string;
+  iconPlacement?: "corner" | "top";
+  class?: string;
+}
+
+const {
+  index,
+  label,
+  title,
+  body,
+  icon,
+  iconPlacement = "top",
+  class: className = "",
+} = Astro.props;
+---
+
+<article
+  class:list={[
+    "relative flex flex-col overflow-hidden bg-white p-7 transition-colors duration-200 hover:bg-zinc-50 sm:p-8 dark:bg-ink-950 dark:hover:bg-white/[0.03]",
+    title ? "min-h-[14rem]" : "min-h-[10rem]",
+    className,
+  ]}
+>
+  <div class="flex items-start justify-between gap-4">
+    <p class="font-mono text-[0.6875rem] tracking-[0.16em] text-zinc-500 uppercase dark:text-zinc-500">
+      <span aria-hidden="true">&mdash;</span> {index}
+      <span class="mx-1 text-zinc-300 dark:text-zinc-700">/</span>
+      {
+        title ? (
+          label
+        ) : (
+          <span class="font-semibold text-zinc-950 dark:text-white">{label}</span>
+        )
+      }
+    </p>
+    {
+      iconPlacement === "top" && (
+        <Glyph name={icon} class="shrink-0 text-accent-700 dark:text-accent-400" />
+      )
+    }
+  </div>
+  {
+    title && (
+      <h3 class="mt-7 text-xl font-medium tracking-tight text-zinc-950 dark:text-white">
+        {title}
+        <span class="text-accent-700 dark:text-accent-400">.</span>
+      </h3>
+    )
+  }
+  <p
+    class:list={[
+      "relative z-10 max-w-xs text-zinc-600 dark:text-zinc-400",
+      title ? "mt-3 text-[0.9375rem]/relaxed" : "mt-4 text-sm/relaxed",
+    ]}
+  >
+    {body}
+  </p>
+  {
+    iconPlacement === "corner" && (
+      <Glyph
+        name={icon}
+        strokeWidth={1}
+        class="pointer-events-none absolute right-4 bottom-3 h-14 w-14 text-accent-700/[0.18] dark:text-accent-400/[0.16]"
+      />
+    )
+  }
+</article>

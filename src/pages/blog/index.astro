@@ -2,7 +2,6 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Container from "../../components/ui/Container.astro";
 import PageHeader from "../../components/PageHeader.astro";
-import BrandStrip from "../../components/sections/BrandStrip.astro";
 import PostList from "../../components/PostList.astro";
 import Pagination from "../../components/Pagination.astro";
 import { getPosts } from "../../lib/posts";
@@ -22,7 +21,6 @@ const pagePosts = posts.slice(0, BLOG_PAGE_SIZE);
     title="Writing"
     lede="Notes on fine-tuning, distillation, evaluation, and getting useful work out of small models."
   />
-  <BrandStrip />
 
   <Container width="prose" class="py-10 sm:py-12">
     <PostList base="/blog" posts={pagePosts} empty="First posts coming soon." />

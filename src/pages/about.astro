@@ -1,5 +1,6 @@
 ---
 import PageLayout from "../layouts/PageLayout.astro";
+import BrandStrip from "../components/sections/BrandStrip.astro";
 import { SITE, CONTACT } from "../consts";
 ---
 
@@ -9,6 +10,7 @@ import { SITE, CONTACT } from "../consts";
   description={`About ${SITE.name}.`}
   lede="A workbench for language model experiments, built on the idea that a small model you own and understand beats a large one you rent and can't inspect."
 >
+  <BrandStrip slot="banner" />
 
   <h2>Why this exists</h2>
   <p>

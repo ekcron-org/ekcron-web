@@ -12,13 +12,7 @@ interface Props {
 const { title, eyebrow, lede, width = "prose" } = Astro.props;
 ---
 
-<div class="relative overflow-hidden border-b border-zinc-200 dark:border-white/10">
-  <div
-    class="pointer-events-none absolute inset-0 text-zinc-900 opacity-60 dark:text-white dark:opacity-100"
-    aria-hidden="true"
-  >
-    <div class="bg-grid absolute inset-0"></div>
-  </div>
+<div class="relative border-b border-zinc-200 dark:border-white/10">
   <Container width={width} class="relative py-16 sm:py-20">
     <div class:list={[width === "default" && "max-w-2xl"]}>
       {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}

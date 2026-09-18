@@ -11,11 +11,9 @@
 /*
   DESIGN TOKENS — single source of truth for the whole site.
 
-  Interaction colour is a deep blue, deliberately distinct from the mark's
-  cyan-to-violet gradient: white on accent-700 clears WCAG AA, and a solid
-  hue reads calmer than a gradient on controls. The mark keeps its violet
-  via --color-brand-violet; cyan stays the highlight partner and is never
-  used for small text on light surfaces.
+  Accent is the mark's cyan: brand cyan on dark surfaces, the deep teal end
+  of the same ramp for text on light. Violet stays reserved for the mark.
+  Buttons are ink on light and white on dark, mirroring the product app.
 
   Re-theme the site by editing these values and nothing else.
 */
@@ -25,17 +23,17 @@
   --font-mono: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo,
     Consolas, monospace;
 
-  --color-accent-50: #eef4ff;
-  --color-accent-100: #dbe6fe;
-  --color-accent-200: #bfd3fe;
-  --color-accent-300: #93b4fd;
-  --color-accent-400: #608ffa;
-  --color-accent-500: #3b6bf6;
-  --color-accent-600: #254eeb;
-  --color-accent-700: #1d3dd8;
-  --color-accent-800: #1e34af;
-  --color-accent-900: #1e318a;
-  --color-accent-950: #172154;
+  --color-accent-50: #ecfdfb;
+  --color-accent-100: #cbf8f3;
+  --color-accent-200: #9df0e9;
+  --color-accent-300: #5fe1da;
+  --color-accent-400: #24e5df;
+  --color-accent-500: #14c4bf;
+  --color-accent-600: #12a8a3;
+  --color-accent-700: #0f8480;
+  --color-accent-800: #106966;
+  --color-accent-900: #125654;
+  --color-accent-950: #053534;
 
   /* The mark's own violet. Reserved for the logo and the one gradient phrase
      so re-theming interaction colour never alters the brand mark. */
@@ -91,7 +89,7 @@ h4 {
 }
 
 html.dark ::selection {
-  background-color: var(--color-accent-700);
+  background-color: var(--color-accent-800);
   color: #fff;
 }
 
@@ -111,67 +109,6 @@ html.dark ::selection {
 
 /* --- Brand -------------------------------------------------------------- */
 
-/* Signature gradient. Used sparingly: one phrase per view, plus fine accents. */
-.text-brand-gradient {
-  background-image: linear-gradient(
-    100deg,
-    var(--color-cyan-brand) 0%,
-    var(--color-brand-violet) 62%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.bg-brand-gradient {
-  background-image: linear-gradient(
-    100deg,
-    var(--color-cyan-brand) 0%,
-    var(--color-brand-violet) 62%
-  );
-}
-
-/* Hairline rule that fades at both ends — used to separate major bands. */
-.rule-fade {
-  height: 1px;
-  background-image: linear-gradient(
-    to right,
-    transparent,
-    color-mix(in oklab, currentColor 18%, transparent) 20%,
-    color-mix(in oklab, currentColor 18%, transparent) 80%,
-    transparent
-  );
-}
-
-/*
-  Engineering-grid backdrop, masked so it dissolves toward the edges.
-  `currentColor` lets the same class sit on light or dark surfaces.
-*/
-.bg-grid {
-  background-image:
-    linear-gradient(
-      to right,
-      color-mix(in oklab, currentColor 7%, transparent) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      to bottom,
-      color-mix(in oklab, currentColor 7%, transparent) 1px,
-      transparent 1px
-    );
-  background-size: 56px 56px;
-  -webkit-mask-image: radial-gradient(
-    ellipse 75% 60% at 50% 0%,
-    #000 35%,
-    transparent 100%
-  );
-  mask-image: radial-gradient(
-    ellipse 75% 60% at 50% 0%,
-    #000 35%,
-    transparent 100%
-  );
-}
-
 .hud-pulse {
   animation: hud-pulse 2.4s var(--ease-out-quint) infinite;
 }
@@ -188,19 +125,105 @@ html.dark ::selection {
   }
 }
 
-/* Soft brand bloom for hero/CTA surfaces. Decorative only. */
-.bloom-brand {
-  background-image:
-    radial-gradient(
-      40rem 22rem at 18% -10%,
-      color-mix(in oklab, var(--color-cyan-brand) 22%, transparent),
-      transparent 70%
-    ),
-    radial-gradient(
-      38rem 20rem at 82% 0%,
-      color-mix(in oklab, var(--color-brand-violet) 26%, transparent),
-      transparent 70%
-    );
+/* Slow breathing for the CTA glow and a gentle float for the coin. */
+.glow-breathe {
+  animation: glow-breathe 7s ease-in-out infinite;
+}
+.glow-breathe-slow {
+  animation: glow-breathe 11s ease-in-out infinite reverse;
+}
+@keyframes glow-breathe {
+  0%,
+  100% {
+    opacity: 0.7;
+    transform: translate(var(--tw-translate-x, 0), var(--tw-translate-y, 0)) scale(0.92);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(var(--tw-translate-x, 0), var(--tw-translate-y, 0)) scale(1.06);
+  }
+}
+
+.coin-float {
+  animation: coin-float 8s ease-in-out infinite;
+}
+@keyframes coin-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+}
+
+/* A single light travelling the panel's edge: cyan head, violet tail. */
+@property --beam {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+.border-beam::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(
+    from var(--beam),
+    transparent 0deg,
+    transparent 250deg,
+    rgba(163, 29, 255, 0.55) 300deg,
+    rgba(36, 229, 223, 0.95) 340deg,
+    transparent 360deg
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: border-beam 7s linear infinite;
+}
+@keyframes border-beam {
+  to {
+    --beam: 360deg;
+  }
+}
+
+/* Scroll reveal: elements start hidden and settle in once on screen. */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 0.9s var(--ease-out-quint),
+    transform 0.9s var(--ease-out-quint);
+}
+.reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* --- Schematics ----------------------------------------------------------- */
+
+/* Drawn-in strokes: dasharray/offset set by the component, this only eases them. */
+.draw {
+  transition: stroke-dashoffset 1.2s var(--ease-out-quint);
+}
+.grow-x {
+  transform-origin: left center;
+  transition: transform 0.9s var(--ease-out-quint);
+}
+.grow-y {
+  transform-origin: center bottom;
+  transition: transform 0.6s var(--ease-out-quint);
+}
+.fade-in {
+  transition: opacity 0.5s ease;
 }
 
 /* --- Prose -------------------------------------------------------------- */

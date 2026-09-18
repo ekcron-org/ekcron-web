@@ -1,30 +1,45 @@
 ---
 import { CAPABILITIES } from "../../consts";
-import Card from "../ui/Card.astro";
+import Cell from "../ui/Cell.astro";
 import Container from "../ui/Container.astro";
 import Section from "../ui/Section.astro";
 import SectionHeading from "../ui/SectionHeading.astro";
+
+const [lead, ...rest] = CAPABILITIES;
 ---
 
 <Section id="capabilities" divider>
-  <Container>
+  <Container width="wide">
     <SectionHeading
       eyebrow="Capabilities"
       title="The parts you'd otherwise assemble yourself"
-      body="Training orchestration, data review, evaluation, serving, and export in one place, so an experiment doesn't become an infrastructure project."
+      body="Training, data review, evaluation, serving, and export in one place, so an experiment doesn't become an infrastructure project."
     />
 
-    <div class="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div
+      class="mt-14 grid gap-px overflow-hidden rounded-xl border border-zinc-200 bg-zinc-200 sm:grid-cols-2 lg:grid-cols-3 dark:border-white/10 dark:bg-white/10"
+    >
+      <Cell
+        index="01"
+        label={lead.label}
+        title={lead.title}
+        body={lead.body}
+        icon={lead.icon}
+        class="lg:col-span-2 lg:bg-zinc-50 lg:p-10 dark:lg:bg-ink-900 [&_h3]:lg:text-3xl [&_p:last-child]:lg:max-w-md [&_p:last-child]:lg:text-base/relaxed"
+      />
       {
-        CAPABILITIES.map((item) => (
-          <Card interactive class="p-6">
-            <h3 class="text-base font-medium text-zinc-950 dark:text-white">
-              {item.title}
-            </h3>
-            <p class="mt-2.5 text-sm/relaxed text-zinc-600 dark:text-zinc-400">
-              {item.body}
-            </p>
-          </Card>
+        rest.map((item, i) => (
+          <Cell
+            index={`0${i + 2}`}
+            label={item.label}
+            title={item.title}
+            body={item.body}
+            icon={item.icon}
+            class:list={[
+              i === rest.length - 1 &&
+                "lg:col-span-3 lg:grid lg:min-h-0 lg:grid-cols-[10rem_1fr_1.4fr] lg:items-baseline lg:gap-x-10 [&>*]:lg:mt-0 [&_p:last-of-type]:lg:max-w-none",
+            ]}
+          />
         ))
       }
     </div>

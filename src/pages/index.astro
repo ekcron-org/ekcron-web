@@ -5,13 +5,13 @@ import Section from "../components/ui/Section.astro";
 import SectionHeading from "../components/ui/SectionHeading.astro";
 import PostList from "../components/PostList.astro";
 import Hero from "../components/sections/Hero.astro";
+import BrandStrip from "../components/sections/BrandStrip.astro";
 import Pipeline from "../components/sections/Pipeline.astro";
-import Capabilities from "../components/sections/Capabilities.astro";
 import Showcase from "../components/sections/Showcase.astro";
+import Capabilities from "../components/sections/Capabilities.astro";
 import Experiments from "../components/sections/Experiments.astro";
 import FaqSection from "../components/sections/FaqSection.astro";
 import CtaBand from "../components/sections/CtaBand.astro";
-import BrandStrip from "../components/sections/BrandStrip.astro";
 import { getPosts } from "../lib/posts";
 import { HOME_POST_COUNT, SHOWCASES } from "../consts";
 
@@ -21,7 +21,7 @@ const posts = (await getPosts()).slice(0, HOME_POST_COUNT);
 <BaseLayout>
   <Hero />
 
-  <BrandStrip class="mt-20 border-t sm:mt-24" />
+  <BrandStrip class="border-t" />
 
   <Pipeline />
   <Capabilities />
@@ -35,12 +35,12 @@ const posts = (await getPosts()).slice(0, HOME_POST_COUNT);
       <Section divider>
         <Container>
           <div class="flex flex-wrap items-end justify-between gap-4">
-            <SectionHeading eyebrow="Writing" title="From the blog" />
+            <SectionHeading eyebrow="Notes" title="Notes from the workbench" />
             <a
               href="/blog"
               class="text-sm font-medium text-accent-700 transition-colors hover:text-accent-600 dark:text-accent-300 dark:hover:text-accent-200"
             >
-              All posts &rarr;
+              All notes &rarr;
             </a>
           </div>
           <div class="mt-10">

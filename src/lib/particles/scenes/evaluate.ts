@@ -1,57 +1,37 @@
-import type { Frame, Rgb, Scene, SceneFactory } from "../types";
+import type { Frame, Scene, SceneFactory } from "../types";
 import { MONO, bell, clamp, easeOut, rand, rgba } from "../palette";
 
-const ARRIVE_MS = 48;
-const HOLD_MS = 1500;
+const ARRIVE_MS = 120;
+const HOLD_MS = 2600;
 
-interface Sample {
-  jitter: number;
-  score: number;
+interface Pair {
+  base: number;
+  tuned: number;
   t: number;
 }
 
-interface Lane {
-  centre: number;
-  mean: number;
-  spread: number;
-  shown: number;
-  samples: Sample[];
-}
-
-/** Deliberately overlapping distributions: the point is comparison, not a guaranteed win. */
-const LANES: { centre: number; mean: number; spread: number }[] = [
-  { centre: 0.34, mean: 0.47, spread: 0.4 },
-  { centre: 0.68, mean: 0.64, spread: 0.36 },
-];
-
-function draw(lane: { mean: number; spread: number }): Sample {
-  return {
-    jitter: rand(-1, 1) * Math.pow(Math.random(), 0.55),
-    score: clamp(lane.mean + (bell() - 0.5) * lane.spread, 0.05, 0.96),
-    t: 0,
-  };
+/**
+ * Same held-out item, both models. Tuned usually wins, sometimes loses, and
+ * the losses are drawn as plainly as the wins.
+ */
+function drawPair(): Pair {
+  const base = clamp(0.4 + (bell() - 0.5) * 0.8, 0.06, 0.82);
+  const delta = 0.19 + (bell() - 0.5) * 0.5 + rand(-0.03, 0.03);
+  return { base, tuned: clamp(base + delta, 0.05, 0.97), t: 1 };
 }
 
 export const evaluate: SceneFactory = (density): Scene => {
-  const count = Math.max(20, Math.round(52 * density));
-
-  const lanes: Lane[] = LANES.map((l) => ({
-    ...l,
-    shown: 0,
-    samples: Array.from({ length: count }, () => draw(l)),
-  }));
-
-  let cursor = 0;
+  const count = Math.max(14, Math.round(26 * density));
+  let pairs: Pair[] = Array.from({ length: count }, drawPair);
+  let cursor = count;
   let acc = 0;
   let hold = 0;
 
   return {
     step(dt) {
-      for (const lane of lanes) {
-        for (let i = 0; i < lane.shown; i++) {
-          const s = lane.samples[i];
-          if (s.t < 1) s.t = Math.min(1, s.t + dt * 0.0026);
-        }
+      for (let i = 0; i < cursor; i++) {
+        const p = pairs[i];
+        if (p.t < 1) p.t = Math.min(1, p.t + dt * 0.0022);
       }
 
       if (cursor >= count) {
@@ -59,10 +39,7 @@ export const evaluate: SceneFactory = (density): Scene => {
         if (hold < HOLD_MS) return;
         hold = 0;
         cursor = 0;
-        for (const lane of lanes) {
-          lane.shown = 0;
-          lane.samples = Array.from({ length: count }, () => draw(lane));
-        }
+        pairs = Array.from({ length: count }, () => ({ ...drawPair(), t: 0 }));
         return;
       }
 
@@ -70,15 +47,18 @@ export const evaluate: SceneFactory = (density): Scene => {
       while (acc >= ARRIVE_MS && cursor < count) {
         acc -= ARRIVE_MS;
         cursor++;
-        for (const lane of lanes) lane.shown = cursor;
       }
     },
 
     render({ ctx, w, h, palette }: Frame) {
-      const padTop = Math.max(26, h * 0.16);
-      const padBottom = Math.max(30, h * 0.16);
+      const padX = Math.max(18, w * 0.08);
+      const padTop = Math.max(30, h * 0.18);
+      const padBottom = Math.max(26, h * 0.14);
+      const plotW = w - padX * 2;
       const plotH = h - padTop - padBottom;
-      const halfWidth = Math.min(w * 0.14, Math.min(w, h) * 0.17);
+      if (plotW <= 0 || plotH <= 0) return;
+
+      const xOf = (i: number) => padX + (i / (count - 1)) * plotW;
       const yOf = (score: number) => padTop + (1 - score) * plotH;
 
       ctx.strokeStyle = rgba(palette.axis, 0.07);
@@ -86,55 +66,85 @@ export const evaluate: SceneFactory = (density): Scene => {
       for (let g = 0; g <= 4; g++) {
         const y = Math.round(padTop + (plotH * g) / 4) + 0.5;
         ctx.beginPath();
-        ctx.moveTo(w * 0.08, y);
-        ctx.lineTo(w * 0.92, y);
+        ctx.moveTo(padX, y);
+        ctx.lineTo(padX + plotW, y);
         ctx.stroke();
       }
 
-      const colours: Rgb[] = [palette.source, palette.target];
+      let baseSum = 0;
+      let tunedSum = 0;
+      let landed = 0;
+      let ahead = 0;
+      let behind = 0;
 
-      lanes.forEach((lane, li) => {
-        const cx = w * lane.centre;
-        const colour = colours[li];
-        let sum = 0;
-        let landed = 0;
+      for (let i = 0; i < cursor; i++) {
+        const p = pairs[i];
+        const e = easeOut(p.t);
+        const x = xOf(i);
+        const yBase = yOf(p.base);
+        const yTuned = yBase + (yOf(p.tuned) - yBase) * e;
+        const wins = p.tuned >= p.base;
+        const colour = wins ? palette.target : palette.muted;
 
-        ctx.fillStyle = rgba(colour, 1);
-        for (let i = 0; i < lane.shown; i++) {
-          const s = lane.samples[i];
-          const e = easeOut(s.t);
-          const y = yOf(-0.12 + (s.score + 0.12) * e);
-          ctx.globalAlpha = 0.16 + 0.42 * s.t;
-          ctx.beginPath();
-          ctx.arc(cx + s.jitter * halfWidth, y, 2.1, 0, Math.PI * 2);
-          ctx.fill();
-          if (s.t > 0.6) {
-            sum += s.score;
-            landed++;
-          }
-        }
-        ctx.globalAlpha = 1;
-
-        if (landed < 3) return;
-
-        const meanY = yOf(sum / landed);
-        ctx.strokeStyle = rgba(colour, 0.85);
-        ctx.lineWidth = 1.4;
+        ctx.strokeStyle = rgba(colour, 0.35 + 0.3 * e);
+        ctx.lineWidth = 1.2;
         ctx.beginPath();
-        ctx.moveTo(cx - halfWidth - 6, meanY);
-        ctx.lineTo(cx + halfWidth + 6, meanY);
+        ctx.moveTo(x, yBase);
+        ctx.lineTo(x, yTuned);
         ctx.stroke();
 
-        ctx.font = MONO;
-        ctx.textAlign = "center";
-        ctx.fillStyle = rgba(colour, 0.9);
-        ctx.fillText(((sum / landed) * 100).toFixed(0), cx, meanY - 8);
-        ctx.textAlign = "left";
-      });
+        ctx.fillStyle = rgba(palette.source, 0.9);
+        ctx.beginPath();
+        ctx.arc(x, yBase, 2.1, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = rgba(colour, 0.35 + 0.6 * e);
+        ctx.beginPath();
+        ctx.arc(x, yTuned, 2.4, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (p.t > 0.7) {
+          landed++;
+          baseSum += p.base;
+          tunedSum += p.tuned;
+          wins ? ahead++ : behind++;
+        }
+      }
 
       ctx.font = MONO;
+      ctx.textBaseline = "alphabetic";
+
+      if (landed >= 3) {
+        const baseMean = baseSum / landed;
+        const tunedMean = tunedSum / landed;
+        const lines: [number, typeof palette.source, string][] = [
+          [baseMean, palette.source, `base ${(baseMean * 100).toFixed(0)}`],
+          [tunedMean, palette.target, `tuned ${(tunedMean * 100).toFixed(0)}`],
+        ];
+        ctx.setLineDash([3, 4]);
+        ctx.lineWidth = 1;
+        for (const [mean, colour, label] of lines) {
+          const y = Math.round(yOf(mean)) + 0.5;
+          ctx.strokeStyle = rgba(colour, 0.45);
+          ctx.beginPath();
+          ctx.moveTo(padX, y);
+          ctx.lineTo(padX + plotW, y);
+          ctx.stroke();
+          ctx.fillStyle = rgba(colour, 0.95);
+          ctx.textAlign = "right";
+          ctx.fillText(label, padX + plotW, y - 5);
+        }
+        ctx.setLineDash([]);
+        ctx.textAlign = "left";
+      }
+
       ctx.fillStyle = rgba(palette.muted, 0.8);
-      ctx.fillText(`held out  ${String(cursor).padStart(2, "0")}/${count}`, w * 0.08, padTop - 12);
+      ctx.fillText(`held out  ${String(cursor).padStart(2, "0")}/${count}`, padX, padTop - 12);
+      if (landed >= 3) {
+        ctx.textAlign = "right";
+        ctx.fillText(`ahead ${ahead}  ·  behind ${behind}`, padX + plotW, padTop - 12);
+        ctx.textAlign = "left";
+      }
     },
   };
 };

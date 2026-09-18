@@ -95,63 +95,150 @@ export const HERO = {
   headingLead: "Experiment with language models,",
   headingAccent: "end to end.",
   body:
-    "Prepare data, fine-tune or distill an open model for your own domain, measure what actually changed against a baseline, then deploy behind an API or export the weights and run them yourself.",
+    "Fine-tune or distill an open model on your data, prove it beat the base, then serve it or take the weights home.",
   primaryCta: "Get started",
   secondaryCta: "How it works",
 } as const;
 
-export const PIPELINE: { step: string; title: string; body: string }[] = [
+/** Mono facts under the brand banner. Each one is true of the running system. */
+
+export const PIPELINE: { step: string; title: string; body: string; icon: string }[] = [
   {
     step: "01",
-    title: "Bring your data",
-    body: "Upload documents or import an existing dataset. Parsing, chunking, and structuring are handled for you.",
+    title: "Upload",
+    body: "Documents, a chat-format dataset, or traffic captured from a model already in use.",
+    icon: "upload",
   },
   {
     step: "02",
-    title: "Build a training set",
-    body: "Generate candidate examples, review and curate them, and keep a held-out split aside before anything is trained.",
+    title: "Parse",
+    body: "Text extracted and chunked. A golden holdout is set aside that nothing ever trains on.",
+    icon: "parse",
   },
   {
     step: "03",
-    title: "Fine-tune or distill",
-    body: "Run QLoRA, LoRA, or full fine-tuning on open models using supervised, preference, or reinforcement methods, on managed GPUs.",
+    title: "Generate",
+    body: "Draft a sample, rate it, refine the guidance, then write the full training set.",
+    icon: "generate",
   },
   {
     step: "04",
-    title: "Evaluate honestly",
-    body: "Score the result against the held-out split and the base model, so you can see whether the run actually improved anything.",
+    title: "Train",
+    body: "LoRA or QLoRA on an open model. A quick run, or iterative, aligned, and reasoning runs.",
+    icon: "train",
   },
   {
     step: "05",
-    title: "Deploy or export",
-    body: "Serve the model behind an OpenAI-compatible endpoint, or export adapters and GGUF builds to run locally or at the edge.",
+    title: "Evaluate",
+    body: "Tuned and base scored on the same held-out data. A deploy can wait for the result.",
+    icon: "evaluate",
+  },
+  {
+    step: "06",
+    title: "Deploy",
+    body: "An OpenAI-compatible endpoint, or adapters and GGUF builds for your own hardware.",
+    icon: "deploy",
   },
 ];
 
-export const CAPABILITIES: { title: string; body: string }[] = [
+export const CAPABILITIES: { label: string; title: string; body: string; icon: string }[] = [
   {
+    label: "Runs",
     title: "Managed training runs",
     body: "GPU scheduling, checkpoints, retries, and live metrics, so a long run surviving a restart isn't your problem.",
+    icon: "runs",
   },
   {
+    label: "Data",
     title: "Data curation in the loop",
     body: "Generate examples, then keep, edit, or reject them. Training data stays something you reviewed, not something you hope is fine.",
+    icon: "data",
   },
   {
+    label: "Evaluation",
     title: "Evaluation and comparison",
     body: "Held-out splits, judge-based scoring, and side-by-side comparison against the base model before anything ships.",
+    icon: "compare",
   },
   {
+    label: "Inference",
     title: "OpenAI-compatible inference",
     body: "Point an existing client at a new base URL. Your tuned model answers the same request shape you already send.",
+    icon: "inference",
   },
   {
+    label: "Export",
     title: "Export and self-host",
     body: "Download adapters or GGUF builds and run them on your own hardware, a laptop, or an edge device. No lock-in.",
+    icon: "export",
   },
   {
+    label: "Lineage",
     title: "Reproducible by default",
     body: "Every run keeps its dataset version, configuration, and metrics, so a result you liked can be found and repeated.",
+    icon: "lineage",
+  },
+];
+
+export interface ShowcaseItem {
+  id: string;
+  eyebrow: string;
+  title: string;
+  body: string[];
+  scene: "distill" | "train" | "evaluate";
+  label: string;
+  status: string;
+  legend: { tone: "source" | "target"; label: string }[];
+}
+
+export const SHOWCASES: ShowcaseItem[] = [
+  {
+    id: "distillation",
+    eyebrow: "Distillation",
+    title: "A small model can inherit behaviour from a large one.",
+    body: [
+      "Capture how a larger model handles your task, then train a small open model on that behaviour instead of writing every example by hand.",
+      "Teacher and student are then scored on the same held-out tasks, so how much of the quality carried over is a number, not a feeling.",
+    ],
+    scene: "distill",
+    label: "Transfer map",
+    status: "Transferring",
+    legend: [
+      { tone: "source", label: "Large model" },
+      { tone: "target", label: "Small model" },
+    ],
+  },
+  {
+    id: "training",
+    eyebrow: "Training",
+    title: "See training as it happens.",
+    body: [
+      "Runs are scheduled on GPUs, checkpointed as they go, and stream step, loss, learning rate, and throughput while they are still running.",
+      "A run that stalls or a loss that stops falling is visible in minutes, not after the bill.",
+    ],
+    scene: "train",
+    label: "Run monitor",
+    status: "Streaming",
+    legend: [
+      { tone: "source", label: "Training loss" },
+      { tone: "target", label: "Held-out loss" },
+    ],
+  },
+  {
+    id: "evaluation",
+    eyebrow: "Evaluation",
+    title: "The comparison that matters is against the model you started with.",
+    body: [
+      "Every tuned model is scored on a split held back before training began, side by side with the base model on that same split.",
+      "The unflattering result is visible too. A run that changed nothing, or made things worse, looks exactly like what it is.",
+    ],
+    scene: "evaluate",
+    label: "Held-out scores",
+    status: "Scoring",
+    legend: [
+      { tone: "source", label: "Base model" },
+      { tone: "target", label: "Tuned model" },
+    ],
   },
 ];
 
@@ -175,67 +262,6 @@ export const EXPERIMENTS: { label: string; title: string; body: string }[] = [
     label: "Constrain",
     title: "Make output shape reliable",
     body: "Tune for structured output and tool calls, then verify the format holds across a held-out set instead of trusting a few spot checks.",
-  },
-];
-
-export interface ShowcaseItem {
-  id: string;
-  eyebrow: string;
-  title: string;
-  body: string[];
-  scene: "distill" | "train" | "evaluate";
-  label: string;
-  status: string;
-  legend: { tone: "source" | "target"; label: string }[];
-}
-
-export const SHOWCASES: ShowcaseItem[] = [
-  {
-    id: "distillation",
-    eyebrow: "Distillation",
-    title: "A small model can inherit behaviour from a large one.",
-    body: [
-      "Capture how a larger model handles your task, then train a small open model on that behaviour instead of writing every example by hand.",
-      "The result is scored against a held-out split and against the base model, so you can see how much of the original quality actually carried over.",
-    ],
-    scene: "distill",
-    label: "Transfer map",
-    status: "Transferring",
-    legend: [
-      { tone: "source", label: "Large model" },
-      { tone: "target", label: "Small model" },
-    ],
-  },
-  {
-    id: "training",
-    eyebrow: "Training",
-    title: "See training as it happens.",
-    body: [
-      "Runs are scheduled on GPUs, checkpointed as they go, and report step, loss, learning rate, and throughput while they are still running.",
-    ],
-    scene: "train",
-    label: "Run monitor",
-    status: "Streaming",
-    legend: [
-      { tone: "source", label: "Training loss" },
-      { tone: "target", label: "Held-out loss" },
-    ],
-  },
-  {
-    id: "evaluation",
-    eyebrow: "Evaluation",
-    title: "The comparison that matters is against the model you started with.",
-    body: [
-      "Every tuned model is scored on a split that was held back before training began, then placed side by side with the base model on that same split.",
-      "This makes the unflattering result visible too. A run that changed nothing, or made things worse, looks exactly like what it is.",
-    ],
-    scene: "evaluate",
-    label: "Held-out scores",
-    status: "Scoring",
-    legend: [
-      { tone: "source", label: "Base model" },
-      { tone: "target", label: "Tuned model" },
-    ],
   },
 ];
 

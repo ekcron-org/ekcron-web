@@ -1,0 +1,38 @@
+---
+/** Small stroked pictograms for grid cells. Add a name here to use it in consts. */
+interface Props {
+  name: string;
+  strokeWidth?: number;
+  class?: string;
+}
+
+const { name, strokeWidth = 1.5, class: className = "" } = Astro.props;
+
+const PATHS: Record<string, string> = {
+  upload: "M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z M14 3v5h5 M12 18v-6 M9 15l3-3 3 3",
+  parse: "M4 4h16v4H4z M4 10h16v4H4z M4 16h16v4H4z",
+  generate: "M4 20l4-1L19 8l-3-3L5 16l-1 4z M13 7l3 3 M14 20h6",
+  train: "M4 6h8 M16 6h4 M14 4v4 M4 12h3 M11 12h9 M9 10v4 M4 18h11 M19 18h1 M17 16v4",
+  evaluate: "M12 3v18 M8 21h8 M12 6L6 8 M12 6l6 2 M3 14l3-6 3 6a3 3 0 0 1-6 0z M15 14l3-6 3 6a3 3 0 0 1-6 0z",
+  deploy: "M4 4h16v6H4z M4 14h16v6H4z M8 7h.01 M8 17h.01 M16 7h2 M16 17h2",
+  runs: "M3 12h4l3-8 4 16 3-8h4",
+  data: "M9 6h11 M9 12h11 M9 18h11 M4 6l1 1 2-2 M4 12l1 1 2-2 M4 18l1 1 2-2",
+  compare: "M4 5h7v14H4z M13 5h7v14h-7z M6.5 12h2 M15.5 10h2 M15.5 14h2",
+  inference: "M4 17l6-5-6-5 M12 19h8",
+  export: "M12 4v12 M6 10l6 6 6-6 M4 20h16",
+  lineage: "M6 3v12 M6 21a3 3 0 1 0 0-6 M18 9a3 3 0 1 0 0-6 M18 9a4 4 0 0 1-4 4h-4a4 4 0 0 0-4 4",
+};
+---
+
+<svg
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width={strokeWidth}
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  class:list={["h-5 w-5", className]}
+  aria-hidden="true"
+>
+  <path d={PATHS[name] ?? ""}></path>
+</svg>

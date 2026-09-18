@@ -48,8 +48,7 @@ const ogImage = new URL("/og.jpg", base).href;
     <link rel="icon" href="/icon.png" type="image/png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
 
-    <meta name="theme-color" content="#0b0b0d" media="(prefers-color-scheme: dark)" />
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b0b0d" />
 
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
@@ -86,9 +85,8 @@ const ogImage = new URL("/og.jpg", base).href;
 
     <!-- Apply the stored theme before paint to avoid a flash. -->
     <script is:inline>
-      const stored = localStorage.getItem("theme");
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      if (stored === "dark" || (!stored && prefersDark)) {
+      /* Dark is the default; only an explicit light choice turns it off. */
+      if (localStorage.getItem("theme") !== "light") {
         document.documentElement.classList.add("dark");
       }
     </script>

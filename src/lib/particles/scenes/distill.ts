@@ -84,7 +84,7 @@ function drawBanded(ctx: CanvasRenderingContext2D, proj: Float32Array, colour: R
 }
 
 export const distill: SceneFactory = (density): Scene => {
-  const sourceCount = Math.max(180, Math.round(720 * density));
+  const sourceCount = Math.max(180, Math.round(560 * density));
   const targetCount = Math.max(90, Math.round(280 * density));
   const travelerCount = Math.max(14, Math.round(52 * density));
 
@@ -118,7 +118,7 @@ export const distill: SceneFactory = (density): Scene => {
       }
     },
 
-    render({ ctx, w, h, palette, time }: Frame) {
+    render({ ctx, w, h, palette }: Frame) {
       const s = Math.min(w, h);
       project(source, angleSource, w * 0.28, h * 0.5, s * 0.25, projSource);
       project(target, angleTarget, w * 0.75, h * 0.5, s * 0.13, projTarget);
@@ -180,20 +180,6 @@ export const distill: SceneFactory = (density): Scene => {
           ctx.fill();
         }
       }
-
-      const scanY = ((time * 0.00006) % 1) * h;
-      const band = ctx.createLinearGradient(0, scanY - 26, 0, scanY);
-      band.addColorStop(0, rgba(palette.scan, 0));
-      band.addColorStop(1, rgba(palette.scan, 0.07));
-      ctx.fillStyle = band;
-      ctx.fillRect(0, scanY - 26, w, 26);
-
-      const line = ctx.createLinearGradient(0, 0, w, 0);
-      line.addColorStop(0, rgba(palette.scan, 0));
-      line.addColorStop(0.5, rgba(palette.scan, 0.42));
-      line.addColorStop(1, rgba(palette.scan, 0));
-      ctx.fillStyle = line;
-      ctx.fillRect(0, scanY, w, 1);
     },
   };
 };

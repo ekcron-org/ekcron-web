@@ -5,6 +5,7 @@ const WINDOW = 96;
 const TICK_MS = 95;
 const RUN_LENGTH = 150;
 const EVAL_EVERY = 14;
+const PAUSE_MS = 1400;
 const LOSS_MAX = 2;
 const LOSS_MIN = 0.05;
 
@@ -31,6 +32,7 @@ export const train: SceneFactory = (): Scene => {
   let acc = 0;
   let viewLo = LOSS_MIN;
   let viewHi = LOSS_MAX;
+  let pause = 0;
 
   const series: Point[] = [];
   let evals: EvalPoint[] = [];
@@ -52,18 +54,27 @@ export const train: SceneFactory = (): Scene => {
 
   return {
     step(dt) {
+      // Finished runs pause on their final frame, then the panel clears and a
+      // new run draws in from the left.
+      if (runStep >= RUN_LENGTH) {
+        pause += dt;
+        if (pause < PAUSE_MS) return;
+        pause = 0;
+        runStep = 0;
+        run++;
+        series.length = 0;
+        evals = [];
+      }
+
       acc += dt;
-      while (acc >= TICK_MS) {
+      while (acc >= TICK_MS && runStep < RUN_LENGTH) {
         acc -= TICK_MS;
-        if (runStep >= RUN_LENGTH) {
-          runStep = 0;
-          run++;
-        } else {
-          runStep++;
-        }
+        runStep++;
         totalStep++;
         record();
       }
+
+      if (series.length === 0) return;
 
       // Track the visible window rather than the whole loss range, so the curve
       // fills the panel. Eased so the axis glides instead of snapping.
@@ -120,7 +131,7 @@ export const train: SceneFactory = (): Scene => {
       ctx.clip();
 
       const area = ctx.createLinearGradient(0, padTop, 0, padTop + plotH);
-      area.addColorStop(0, rgba(palette.source, 0.16));
+      area.addColorStop(0, rgba(palette.source, 0.08));
       area.addColorStop(1, rgba(palette.source, 0));
       ctx.fillStyle = area;
       for (const segment of runs) {
@@ -133,10 +144,7 @@ export const train: SceneFactory = (): Scene => {
         ctx.fill();
       }
 
-      const stroke = ctx.createLinearGradient(padX, 0, padX + plotW, 0);
-      stroke.addColorStop(0, rgba(palette.source, 0.55));
-      stroke.addColorStop(1, rgba(palette.target, 0.95));
-      ctx.strokeStyle = stroke;
+      ctx.strokeStyle = rgba(palette.source, 0.9);
       ctx.lineWidth = 1.6;
       ctx.lineJoin = "round";
       for (const segment of runs) {
@@ -149,7 +157,7 @@ export const train: SceneFactory = (): Scene => {
         ctx.stroke();
       }
 
-      const evalX = (e: EvalPoint) => xOf(WINDOW - 1 - (totalStep - e.step));
+      const evalX = (e: EvalPoint) => xOf(series.length - 1 - (totalStep - e.step));
 
       ctx.strokeStyle = rgba(palette.target, 0.42);
       ctx.lineWidth = 1;
@@ -174,9 +182,10 @@ export const train: SceneFactory = (): Scene => {
       ctx.restore();
 
       const head = series[series.length - 1];
+      if (!head) return;
       const lastX = xOf(series.length - 1);
       const lastY = yOf(head.value);
-      ctx.fillStyle = rgba(palette.target, 0.14);
+      ctx.fillStyle = rgba(palette.source, 0.16);
       ctx.beginPath();
       ctx.arc(lastX, lastY, 5.5, 0, Math.PI * 2);
       ctx.fill();
