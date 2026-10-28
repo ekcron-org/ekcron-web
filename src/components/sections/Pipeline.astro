@@ -1,35 +1,228 @@
 ---
 import { PIPELINE } from "../../consts";
-import Cell from "../ui/Cell.astro";
+import PipelineScene from "../visuals/PipelineScene.astro";
 import Container from "../ui/Container.astro";
 import Section from "../ui/Section.astro";
 import SectionHeading from "../ui/SectionHeading.astro";
+
+const summaries: Record<string, string> = {
+  upload: "Bring your documents, chat datasets, or examples from a model already in use.",
+  parse: "Extract and organize your data, keeping a separate set for evaluation.",
+  generate: "Generate training examples, then review and refine them before training.",
+  train: "Fine-tune an open model on your data with efficient LoRA or QLoRA training.",
+  evaluate: "Compare your tuned model with the original on the same held-out tasks.",
+  deploy: "Serve through an API, or export the model to run on your own hardware.",
+};
 ---
 
 <Section id="how-it-works" size="lg">
   <Container width="wide">
     <SectionHeading
       eyebrow="How it works"
-      title="From raw data to a model you can run"
-      body="Six stages. Run one, or the whole path."
+      title="Your data. Your model."
     />
 
-    <ol
-      class="mt-14 grid gap-px overflow-hidden rounded-xl border border-zinc-200 bg-zinc-200 sm:grid-cols-2 lg:grid-cols-3 dark:border-white/10 dark:bg-white/10"
-    >
-      {
-        PIPELINE.map((stage) => (
-          <li class="contents">
-            <Cell
-              index={stage.step}
-              label={stage.title}
-              body={stage.body}
-              icon={stage.icon}
-              iconPlacement="corner"
+    <fieldset class="pipeline">
+      <legend class="sr-only">From raw data to a model you can run</legend>
+      <ol class="pipeline-stages">
+        {PIPELINE.map((stage, index) => (
+          <li class="pipeline-stage">
+            <input
+              class="stage-input sr-only"
+              type="radio"
+              name="pipeline-stage"
+              id={`pipeline-${stage.icon}`}
+              aria-describedby={`pipeline-${stage.icon}-description`}
+              checked={index === 3}
             />
+            <label class="stage-card" for={`pipeline-${stage.icon}`}>
+              <span class="stage-visual"><PipelineScene stage={stage.icon} /></span>
+              <span class="stage-title">{stage.title}</span>
+              {index < PIPELINE.length - 1 && <span class="stage-connector" aria-hidden="true"></span>}
+            </label>
+            <p class="stage-description" id={`pipeline-${stage.icon}-description`}>
+              {summaries[stage.icon]}
+            </p>
           </li>
-        ))
-      }
-    </ol>
+        ))}
+      </ol>
+    </fieldset>
   </Container>
 </Section>
+
+<style>
+  .pipeline {
+    --line: #d4d4d8;
+    --muted: #71717a;
+    --foreground: #27272a;
+    --accent: var(--color-accent-700);
+    position: relative;
+    min-width: 0;
+    margin-top: 64px;
+    padding-bottom: 72px;
+  }
+
+  :global(.dark) .pipeline {
+    --line: #303036;
+    --muted: #85858e;
+    --foreground: #d4d4d8;
+    --accent: var(--color-accent-400);
+  }
+
+  .pipeline-stages {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 32px;
+  }
+
+  .stage-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    color: var(--muted);
+    border-radius: 8px;
+    padding: 12px 0;
+    transition: color .3s;
+  }
+
+  .stage-visual {
+    position: relative;
+    display: block;
+    width: 100%;
+    max-width: 184px;
+    transition: transform .45s var(--ease-out-quint), filter .4s;
+  }
+
+  .stage-visual::before {
+    content: "";
+    position: absolute;
+    inset: -20%;
+    z-index: -1;
+    background: radial-gradient(ellipse, color-mix(in srgb, var(--accent) 8%, transparent), transparent 65%);
+    opacity: 0;
+    transition: opacity .4s;
+  }
+
+  .stage-title {
+    margin-top: 28px;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: -.01em;
+    color: var(--foreground);
+    transition: color .3s;
+  }
+
+  .stage-connector {
+    position: absolute;
+    left: calc(100% + 4px);
+    top: 42%;
+    width: 24px;
+    height: 1px;
+    background: var(--line);
+  }
+
+  .stage-connector::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: -2px;
+    width: 5px;
+    height: 5px;
+    border-top: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+    transform: rotate(45deg);
+  }
+
+  .stage-description {
+    visibility: hidden;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    min-height: 24px;
+    max-width: 640px;
+    margin-inline: auto;
+    color: var(--muted);
+    text-align: center;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .stage-input:checked ~ .stage-description { visibility: visible; }
+  .pipeline:has(.stage-card:hover) .stage-description { visibility: hidden; }
+  .pipeline .pipeline-stage:has(.stage-card:hover) .stage-description { visibility: visible; }
+
+  .pipeline:not(:has(.stage-card:hover)) .stage-input:checked + .stage-card,
+  .stage-card:hover {
+    color: var(--accent);
+  }
+
+  .pipeline:not(:has(.stage-card:hover)) .stage-input:checked + .stage-card .stage-title,
+  .stage-card:hover .stage-title { color: var(--accent); }
+
+  .pipeline:not(:has(.stage-card:hover)) .stage-input:checked + .stage-card .stage-visual,
+  .stage-card:hover .stage-visual {
+    transform: translateY(-6px);
+    filter: drop-shadow(0 0 12px color-mix(in srgb, var(--accent) 12%, transparent));
+  }
+
+  .pipeline:not(:has(.stage-card:hover)) .stage-input:checked + .stage-card .stage-visual::before,
+  .stage-card:hover .stage-visual::before { opacity: 1; }
+
+  .stage-input:focus-visible + .stage-card {
+    outline: 2px solid var(--accent);
+    outline-offset: 6px;
+  }
+
+  :global(.pipeline-scene) { width: 100%; height: auto; overflow: visible; }
+  :global(.scene-floor) { opacity: .08; }
+  :global(.scene-face) { fill: currentColor; stroke: none; opacity: .04; }
+  :global(.scene-node) { fill: currentColor; stroke: none; }
+  :global(.scene-back) { opacity: .25; }
+  :global(.scene-detail) { opacity: .45; }
+  :global(.scene-signal) { stroke-dasharray: 160; stroke-dashoffset: 0; }
+  :global(.scene-travel) { stroke-dasharray: 5 24; }
+
+  .pipeline:not(:has(.stage-card:hover)) .stage-input:checked + .stage-card :global(.scene-signal),
+  .stage-card:hover :global(.scene-signal) { animation: signal-draw 1.8s ease both; }
+
+  .pipeline:not(:has(.stage-card:hover)) .stage-input:checked + .stage-card :global(.scene-travel),
+  .stage-card:hover :global(.scene-travel) { animation: signal-travel 2s linear infinite; }
+
+  .pipeline:not(:has(.stage-card:hover)) .stage-input:checked + .stage-card :global(.scene-layer),
+  .stage-card:hover :global(.scene-layer) {
+    animation: layer-settle 1s var(--ease-out-quint) both;
+    animation-delay: calc(var(--i) * 90ms);
+  }
+
+  @keyframes signal-draw {
+    from { stroke-dashoffset: 160; opacity: .2; }
+    to { stroke-dashoffset: 0; opacity: 1; }
+  }
+  @keyframes signal-travel { to { stroke-dashoffset: -58; } }
+  @keyframes layer-settle {
+    from { transform: translateY(-6px); opacity: .3; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  @media (max-width: 959px) {
+    .pipeline-stages { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 36px; }
+    .pipeline-stage:nth-child(3) .stage-connector { display: none; }
+    .stage-connector { width: 28px; }
+    .stage-visual { max-width: 160px; }
+  }
+
+  @media (max-width: 599px) {
+    .pipeline { margin-top: 36px; padding-bottom: 100px; }
+    .pipeline-stages { gap: 24px 16px; }
+    .stage-title { margin-top: 16px; font-size: 12px; }
+    .stage-connector { display: none; }
+    .stage-description { font-size: 13px; min-height: 66px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stage-visual { transform: none !important; }
+  }
+</style>

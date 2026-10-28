@@ -1,0 +1,55 @@
+---
+interface Props { stage: string }
+const { stage } = Astro.props;
+---
+
+<svg class="pipeline-scene" viewBox="0 0 160 128" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path class="scene-floor" d="M16 94 80 126 144 94 80 62Z M32 86l64 32 M48 78l64 32 M48 110l64-32 M32 102l64-32" />
+  {stage === "upload" && <>
+    <path class="scene-back" d="m42 35 49-12 27 15v54L69 105 42 89Z" />
+    <path class="scene-face" d="M35 43 84 31 111 46v54l-49 13-27-16Z" />
+    <path class="scene-main" d="m35 43 49-12 27 15v54l-49 13-27-16Z M84 31v23l27-8 M84 54 62 60v53 M35 43l27 17" />
+    <path class="scene-signal" d="M77 86V66m-8 10 8-10 8 6 M71 92l13-4" />
+    <path class="scene-travel" d="M77 13v24" />
+  </>}
+  {stage === "parse" && <>
+    {[0, 1, 2].map(i => <g style={`--i:${i}`} class="scene-layer">
+      <path class="scene-face" d={`M36 ${43+i*20} 82 ${21+i*20} 125 ${43+i*20} 79 ${66+i*20}Z`} />
+      <path class="scene-main" d={`m36 ${43+i*20} 46-22 43 22-46 23Z`} />
+      <path class="scene-detail" d={`m52 ${43+i*20} 28-13m-17 18 28-14`} />
+    </g>)}
+    <path class="scene-signal" d="m128 60 9 5v27l-9 5 M137 78h9" />
+  </>}
+  {stage === "generate" && <>
+    <path class="scene-back" d="m41 37 61-16v64L41 101Z" />
+    <path class="scene-face" d="M34 46 95 30v64l-61 16Z" />
+    <path class="scene-main" d="m34 46 61-16v64l-61 16Z" />
+    <path class="scene-detail" d="m45 58 35-9m-35 20 24-6m-24 18 31-8m-31 19 18-5" />
+    <path class="scene-signal" d="m111 43 4 13 12 1-12 8-4 16-4-13-12-1 12-8Z M127 24v12m-6-6h12" />
+    <path class="scene-travel" d="m46 103 40-11" />
+  </>}
+  {stage === "train" && <>
+    <path class="scene-face" d="M48 47 81 30 114 47v38l-33 18-33-18Z" />
+    <path class="scene-main" d="m48 47 33-17 33 17v38l-33 18-33-18Z M48 47l33 18 33-18 M81 65v38" />
+    <path class="scene-detail" d="M61 47 81 37 101 47 81 58Z M60 68v12l10 5V73Z M92 74l10-5v-7l-10 5Z" />
+    <path class="scene-signal" d="M70 47 81 42 92 47 81 53Z M81 42v11 M70 47h22" />
+    {[0,1,2].map(i => <path class="scene-signal scene-pin" style={`--i:${i}`} d={`M${54+i*13} ${94+i*7} l-9 5 M${49+i*13} ${35-i*7} l-9-5 M120 ${56+i*12} l11-6`} />)}
+  </>}
+  {stage === "evaluate" && <>
+    <path class="scene-back" d="m34 39 88-23v72l-88 23Z" />
+    <path class="scene-face" d="M30 45 118 22v72l-88 23Z" />
+    <path class="scene-main" d="m30 45 88-23v72l-88 23Z M42 99l64-17 M42 99V57" />
+    <path class="scene-detail" d="M48 94V77l6-2v17 M69 88V69l6-2v19 M90 83V59l6-2v24" />
+    <path class="scene-signal scene-chart" d="M56 92V69l6-2v23 M77 86V57l6-2v29 M98 81V45l6-2v36" />
+    <path class="scene-detail" d="M44 62l61-16 M44 80l61-16" />
+  </>}
+  {stage === "deploy" && <>
+    <path class="scene-face" d="M32 47 78 24 124 47v18L78 89 32 65Z M32 77 78 101 124 77v16l-46 24-46-24Z" />
+    <path class="scene-main" d="m32 47 46-23 46 23-46 24Z M32 47v18l46 24 46-24V47 M32 77v16l46 24 46-24V77" />
+    <path class="scene-detail" d="M78 71v18 M78 105v12 M51 65l13 7 M51 96l13 7" />
+    <circle class="scene-node" cx="42" cy="61" r="1.5" />
+    <circle class="scene-node" cx="42" cy="92" r="1.5" />
+    <path class="scene-signal" d="M78 56V11m-9 12 9-12 9 12" />
+    <path class="scene-travel" d="m98 67 16-8m-16 38 16-8" />
+  </>}
+</svg>
